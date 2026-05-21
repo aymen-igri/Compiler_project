@@ -1,0 +1,108 @@
+// ============================================================
+//  Fichier de test COMPLET pour l'analyseur lexical Atlas
+//  Couvre : tous les mots-cles, operateurs, types, structures
+// ============================================================
+
+programme test_complet ;
+
+// --- Declaration de constantes ---
+const
+    ent max    = 100 ;
+    ent min    = 10 * 2 ;
+    bool existe = 0 ;   // faux
+
+// --- Declaration de variables ---
+var
+    ent  a, b, c ;
+    bool ok, flag ;
+
+debut
+
+    // ─── TEST 1 : lire / ecrire / imprimer ───
+    lire a ;
+    lireRC b ;
+    imprimer 'valeur de a :' ;
+    ecrire a ;
+    ecrireRC b ;
+    imprimerRC 'fin ligne' ;
+
+    // ─── TEST 2 : affectation et operateurs arithmetiques ───
+    c := a + b ;
+    c := a - b ;
+    c := a * b ;
+    c := a / b ;
+    c := a % b ;
+    c := a puiss b ;
+    c := valabs(a - b) ;
+    c := -a ;
+
+    // ─── TEST 3 : operateurs de comparaison (non-associatifs) ───
+    si (a = b)
+        alors imprimer 'egal' ;
+    fsi
+    si (a <> b)
+        alors imprimer 'different' ;
+    fsi
+    si (a < b)
+        alors imprimer 'inferieur' ;
+    fsi
+    si (a > b)
+        alors imprimer 'superieur' ;
+    fsi
+    si (a <= b)
+        alors imprimer 'inf ou egal' ;
+    fsi
+    si (a >= b)
+        alors imprimer 'sup ou egal' ;
+    fsi
+
+    // ─── TEST 4 : operateurs logiques ───
+    si (ok et flag)
+        alors imprimer 'et logique' ;
+    fsi
+    si (ok ou flag)
+        alors imprimer 'ou logique' ;
+    fsi
+    si (non ok)
+        alors imprimer 'non logique' ;
+    fsi
+
+    // ─── TEST 5 : si / alors / sinon / fsi ───
+    si (a < max)
+        alors
+            c := a ;
+        sinon
+            c := max ;
+    fsi
+
+    // ─── TEST 6 : boucle pour / depuis / jusqua / faire / fpour ───
+    pour a depuis 1 jusqua 10 faire
+        c := c + a ;
+    fpour
+
+    // ─── TEST 7 : boucle pour avec parpas ───
+    pour a depuis 0 jusqua 100 parpas 2 faire
+        imprimer 'pair' ;
+    fpour
+
+    // ─── TEST 8 : boucle tantque / faire / ftq ───
+    tantque (a <> 0) faire
+        a := a - 1 ;
+    ftq
+
+    // ─── TEST 9 : instruction passer ───
+    passer ;
+
+    // ─── TEST 10 : expressions parenthesees complexes ───
+    c := (a + b) * (a - b) ;
+    c := a * b + c / 2 ;
+
+    // ─── TEST 11 : booleen litteral ───
+    ok   := vrai ;
+    flag := faux ;
+
+    // ─── TEST 12 : ecrire le resultat final ───
+    imprimer 'resultat final :' ;
+    ecrireRC c ;
+
+fin.
