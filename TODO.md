@@ -1,30 +1,30 @@
-# Rapport de Projet : Analyse Sémantique et Génération de Code — Langage Atlas
+# Project Report: Semantic Analysis and Code Generation — Atlas Language
 
 ---
 
-## 1. Vue d'ensemble
+## 1. Overview
 
-Ce projet porte sur la **compilation d'un langage source appelé Atlas** vers un langage cible appelé **MAP** (Machine À Pile). Il couvre l'ensemble de la chaîne de compilation : analyse lexicale, analyse syntaxique avec grammaire attribuée, analyse sémantique, génération de code objet, et simulation de la machine cible.
+This project focuses on **compiling a source language called Atlas** into a target language called **MAP** (Machine À Pile / Stack Machine). It covers the entire compilation chain: lexical analysis, syntax analysis with attributed grammar, semantic analysis, object code generation, and simulation of the target machine.
 
 ---
 
-## 2. Langage Source : Atlas
+## 2. Source Language: Atlas
 
-### 2.1 Structure générale d'un programme Atlas
+### 2.1 General Structure of an Atlas Program
 
-Un programme Atlas se compose de deux parties :
+An Atlas program consists of two parts:
 
-- **Partie déclarative** : déclaration des constantes (`const`) et/ou des variables (`var`), dans cet ordre.
-- **Partie opératoire** : les instructions du programme, contenues dans un bloc unique (`debut ... fin.`).
+- **Declarative part**: Declaration of constants (`const`) and/or variables (`var`), in that order.
+- **Operative part**: Program instructions, contained in a single block (`debut ... fin.`).
 
-Les commentaires sont introduits par `//` (commentaire de fin de ligne).
+Comments are introduced by `//` (end-of-line comment).
 
-**Exemple de structure :**
+**Structure Example:**
 ```
-programme <nom> ;
+programme <name> ;
 const
-    ent <id> = <valeur> ;
-    bool <id> = <valeur> ;
+    ent <id> = <value> ;
+    bool <id> = <value> ;
 var
     ent <id1>, <id2>, ... ;
 debut
@@ -32,123 +32,123 @@ debut
 fin.
 ```
 
-### 2.2 Types de données
+### 2.2 Data Types
 
-Il n'existe que **deux types simples** :
-- `ent` : entiers
-- `bool` : booléens (1 = vrai, 0 = faux)
+There are only **two simple types**:
+- `ent`: Integers
+- `bool`: Booleans (1 = true, 0 = false)
 
-Pas de tableaux, ni structures, ni pointeurs, ni fonctions.
+No arrays, structures, pointers, or functions.
 
-### 2.3 Opérateurs
+### 2.3 Operators
 
-| Catégorie | Opérateurs |
+| Category | Operators |
 |---|---|
-| Arithmétiques | `+`, `-` (unaire et binaire), `*`, `/`, `%`, `puiss`, `valabs` |
-| Logiques | `et`, `ou`, `non` |
-| Comparaison | `>`, `>=`, `=`, `<=`, `<>` (différent) — non-associatifs |
-| Affectation | `:=` |
+| Arithmetic | `+`, `-` (unary and binary), `*`, `/`, `%`, `puiss`, `valabs` |
+| Logical | `et`, `ou`, `non` |
+| Comparison | `>`, `>=`, `=`, `<=`, `<>` (different) — non-associative |
+| Assignment | `:=` |
 
-**Priorités arithmétiques (ordre croissant) :** `+`, `-` (binaire) → `*`, `/`, `%` → `-` (unaire)
+**Arithmetic priorities (ascending order):** `+`, `-` (binary) → `*`, `/`, `%` → `-` (unary)
 
-> Le second opérande de `/` et `%` doit être non nul. `puiss(0, 0)` est illégal.
+> The second operand of `/` and `%` must be non-zero. `puiss(0, 0)` is illegal.
 
 ### 2.4 Instructions
 
-- **Affectation** : `ID := exp;`
-- **Instruction vide** : `passer;` (non traduite)
-- **Entrée/Sortie** :
+- **Assignment**: `ID := exp;`
+- **Empty instruction**: `passer;` (not translated)
+- **Input/Output**:
   - `lire ID;` / `lireRC ID;`
   - `ecrire ID;` / `ecrireRC ID;`
   - `imprimer 'text';` / `imprimerRC 'text';`
-  - *(RC = sauter une ligne après l'opération)*
-- **Test conditionnel** :
+  - *(RC = line break after the operation)*
+- **Conditional test**:
   ```
   si (condition)
       alors instruction_1
       [sinon instruction_2]
   fsi
   ```
-- **Boucle pour** :
+- **For loop**:
   ```
   pour ID depuis vi jusqua vf [parpas pas] faire
       instruction
   fpour
   ```
-  (`vi`, `vf` : expressions numériques ; `pas` : constante entière, par défaut +1)
-- **Boucle tant que** :
+  (`vi`, `vf`: numeric expressions; `pas`: integer constant, default +1)
+- **While loop**:
   ```
   tantque (condition) faire
       instruction
   ftq
   ```
 
-Chaque instruction se termine par un point-virgule `;`.
+Each instruction ends with a semicolon `;`.
 
 ---
 
-## 3. Règles Sémantiques
+## 3. Semantic Rules
 
-### 3.1 Table des symboles (TS)
+### 3.1 Symbol Table (ST)
 
-La table des symboles stocke pour chaque objet (constante ou variable) :
+The symbol table stores for each object (constant or variable):
 
-| Champ | Description |
+| Field | Description |
 |---|---|
-| Nom | Identifiant de l'objet |
-| Genre | `const` ou `var` |
-| Type | `ent` ou `bool` |
-| Adresse | Entier incrémenté à chaque déclaration |
-| Valeur | Valeur initiale (0 par défaut pour les variables) |
+| Name | Object identifier |
+| Category | `const` or `var` |
+| Type | `ent` or `bool` |
+| Address | Integer incremented at each declaration |
+| Value | Initial value (default 0 for variables) |
 
-**Exemple (programme `maximum`) :**
+**Example (`maximum` program):**
 
-| Nom | Genre | Type | Adresse | Valeur |
+| Name | Category | Type | Address | Value |
 |---|---|---|---|---|
 | a | Var | Ent | 0 | 0 |
 | b | Var | Ent | 1 | 0 |
 | max | Var | Ent | 2 | 0 |
 
-### 3.2 Fonctions utilitaires de la TS
+### 3.2 Symbol Table Utility Functions
 
-- `lookup(TS, ID)` → retourne l'indice de l'objet dans la TS, ou `-1` s'il n'existe pas.
-  - Si ≠ -1 : **erreur sémantique** (déclaration multiple).
-  - Si = -1 : enregistrer via `put(TS, ID)`.
-- `getAdr(TS, ID)` → retourne l'adresse d'un objet.
-- `getVal(TS, adr)` → retourne la valeur d'une constante.
-- `getGenre(TS, ID)` → retourne le genre d'un identifiant.
+- `lookup(ST, ID)` → returns the index of the object in the ST, or `-1` if it doesn't exist.
+  - If ≠ -1: **semantic error** (multiple declaration).
+  - If = -1: register via `put(ST, ID)`.
+- `getAdr(ST, ID)` → returns the address of an object.
+- `getVal(ST, adr)` → returns the value of a constant.
+- `getGenre(ST, ID)` → returns the category of an identifier.
 
-### 3.3 Règles importantes
+### 3.3 Important Rules
 
-- La valeur initiale d'une variable est **0** par défaut.
-- Il est **interdit** d'initialiser une variable lors de sa déclaration.
-- Une constante **doit** être initialisée par une expression constante.
-- Dans une affectation, l'opérande gauche de `:=` doit être une **lvalue** (identifiant de variable).
-- L'expression droite doit être du même type que la lvalue.
-- L'argument de `lire` / `lireRC` doit aussi être une lvalue.
-- On ne peut pas convertir un booléen en entier.
+- The initial value of a variable is **0** by default.
+- It is **forbidden** to initialize a variable during its declaration.
+- A constant **must** be initialized by a constant expression.
+- In an assignment, the left operand of `:=` must be an **lvalue** (variable identifier).
+- The right expression must be of the same type as the lvalue.
+- The argument of `lire` / `lireRC` must also be an lvalue.
+- You cannot convert a boolean to an integer.
 
 ---
 
-## 4. Langage Cible : MAP (Machine À Pile)
+## 4. Target Language: MAP (Machine À Pile / Stack Machine)
 
-Le code cible est généré vers le langage **MAP**, basé sur une machine à pile d'entiers.
+The target code is generated in the **MAP** language, based on an integer stack machine.
 
-- La pile est nommée `pile[]`, avec le sommet désigné par l'indice `ip`.
+- The stack is named `pile[]`, with the top designated by the index `ip`.
 
-### 4.1 Instructions MAP et leur effet en C
+### 4.1 MAP Instructions and their effect in C
 
-| Instruction MAP | Effet en C |
+| MAP Instruction | Effect in C |
 |---|---|
 | `ouverture-bloc` | `ip = 0;` |
-| `fermeture-bloc` | *(fin du programme)* |
-| `reserver-kst N` | Réserve N emplacements pour les constantes, initialisés via `getVal(TS, i)` |
-| `reserver-var N` | Réserve N emplacements pour les variables, initialisés à 0 |
-| `empiler-val K` | `ip++; pile[ip] = K;` — empile la valeur constante K |
-| `empiler-adr A` | `ip++; pile[ip] = A;` — empile l'adresse d'une variable |
-| `valeur-pile` | `pile[ip] = pile[pile[ip]];` — charge la valeur de la variable dont l'adresse est au sommet |
-| `affect` | `pile[pile[ip-1]] = pile[ip]; ip--;` — affecte le sommet à la variable |
-| `lire` / `lireRC` | `pile[pile[ip]] = valeur_clavier;` |
+| `fermeture-bloc` | *(end of program)* |
+| `reserver-kst N` | Reserve N slots for constants, initialized via `getVal(ST, i)` |
+| `reserver-var N` | Reserve N slots for variables, initialized to 0 |
+| `empiler-val K` | `ip++; pile[ip] = K;` — push constant value K |
+| `empiler-adr A` | `ip++; pile[ip] = A;` — push variable address |
+| `valeur-pile` | `pile[ip] = pile[pile[ip]];` — load the value of the variable whose address is at the top |
+| `affect` | `pile[pile[ip-1]] = pile[ip]; ip--;` — assign the top to the variable |
+| `lire` / `lireRC` | `pile[pile[ip]] = keyboard_value;` |
 | `ecrire` / `ecrireRC` | `printf("%d\n", pile[ip]); ip--;` |
 | `imprimer text` / `imprimerRC text` | `printf("%s\n", text);` |
 | `plus` | `pile[ip-1] = pile[ip-1] + pile[ip]; ip--;` |
@@ -159,20 +159,20 @@ Le code cible est généré vers le langage **MAP**, basé sur une machine à pi
 | `puiss` | `pile[ip-1] = pow(pile[ip-1], pile[ip]); ip--;` |
 | `valabs` | `pile[ip] = pile[ip] >= 0 ? pile[ip] : -pile[ip];` |
 | `neg` | `pile[ip] = -pile[ip];` |
-| `egal`/`pps`/`pgs`/`pp-egal`/`pg-egal`/`dif` | Comparaisons : `pile[ip-1] = pile[ip-1] op pile[ip]; ip--;` |
-| `ou` / `et` | Logique : `pile[ip-1] = pile[ip-1] op pile[ip]; ip--;` |
+| `egal`/`pps`/`pgs`/`pp-egal`/`pg-egal`/`dif` | Comparisons: `pile[ip-1] = pile[ip-1] op pile[ip]; ip--;` |
+| `ou` / `et` | Logic: `pile[ip-1] = pile[ip-1] op pile[ip]; ip--;` |
 | `non` | `pile[ip] = ~pile[ip];` |
-| `bsf etiq` | `CO = (pile[ip] == 0) ? etiq : CO+1; ip++;` — branchement si faux |
-| `bsv etiq` | `CO = (pile[ip] == 1) ? etiq : CO+1; ip++;` — branchement si vrai |
-| `bra etiq` | `CO = etiq;` — branchement inconditionnel |
+| `bsf etiq` | `CO = (pile[ip] == 0) ? etiq : CO+1; ip++;` — branch if false |
+| `bsv etiq` | `CO = (pile[ip] == 1) ? etiq : CO+1; ip++;` — branch if true |
+| `bra etiq` | `CO = etiq;` — unconditional branch |
 
 ---
 
-## 5. Exemples de Compilation
+## 5. Compilation Examples
 
-### Exemple 1 : Programme `somme` (prog1.atlas → prog1.map)
+### Example 1: `somme` program (prog1.atlas → prog1.map)
 
-**Source Atlas :**
+**Atlas Source:**
 ```
 programme somme;
 var
@@ -186,7 +186,7 @@ debut
 fin.
 ```
 
-**Code MAP généré (prog1.map) :**
+**Generated MAP Code (prog1.map):**
 ```
 1   ouverture-bloc
 2   reserver-var 3
@@ -210,9 +210,9 @@ fin.
 
 ---
 
-### Exemple 2 : Programme `test` avec constante et si/sinon (prog2.atlas → prog2.map)
+### Example 2: `test` program with constant and if/else (prog2.atlas → prog2.map)
 
-**Source Atlas :**
+**Atlas Source:**
 ```
 programme test;
 const
@@ -230,7 +230,7 @@ debut
 fin.
 ```
 
-**Code MAP généré (prog2.map) :**
+**Generated MAP Code (prog2.map):**
 ```
 1   ouverture-bloc
 2   reserver-kst 1
@@ -248,12 +248,12 @@ fin.
 14  empiler-adr 0
 15  valeur-pile
 16  pp-egal
-17  bsf 22          ← si faux, aller en 22 (branche sinon)
+17  bsf 22          ← if false, go to 22 (else branch)
 18  empiler-adr 3
 19  empiler-adr 0
 20  valeur-pile
 21  affect
-    bra 26          ← saut fin du si
+    bra 26          ← jump to end of if
 22  empiler-adr 3
 23  empiler-val 2
 24  valeur-pile
@@ -266,9 +266,9 @@ fin.
 
 ---
 
-### Exemple 3 : Programme `factoriel` avec boucle (prog3.atlas → prog3.map)
+### Example 3: `factoriel` program with loop (prog3.atlas → prog3.map)
 
-**Source Atlas :**
+**Atlas Source:**
 ```
 programme factoriel;
 var
@@ -287,7 +287,7 @@ debut
 fin.
 ```
 
-**Code MAP généré (prog3.map) :**
+**Generated MAP Code (prog3.map):**
 ```
 1   ouverture-bloc
 2   reserver-var 3
@@ -311,7 +311,7 @@ fin.
 20  empiler-adr 0
 21  valeur-pile
 22  pp-egal
-23  bsf 38          ← fin de boucle
+23  bsf 38          ← end of loop
 24  empiler-adr 1
 25  empiler-adr 1
 26  valeur-pile
@@ -325,7 +325,7 @@ fin.
 34  empiler-val 1
 35  plus
 36  affect
-37  bra 18          ← retour début boucle
+37  bra 18          ← back to loop start
 38  empiler-adr 1
 39  valeur-pile
 40  ecrire
@@ -334,51 +334,51 @@ fin.
 
 ---
 
-## 6. Travail à Réaliser
+## 6. Work to Realize
 
-Le projet demande de réaliser **4 composants** :
+The project requires the creation of **4 components**:
 
-### 6.1 Simulateur de la Machine à Pile (en C)
-- Implémenter en C un simulateur capable d'exécuter le code MAP produit par le compilateur.
-- Il doit interpréter toutes les instructions MAP listées ci-dessus.
+### 6.1 Stack Machine Simulator (in C)
+- Implement a simulator in C capable of executing the MAP code produced by the compiler.
+- It must interpret all the MAP instructions listed above.
 
-### 6.2 Compilateur avec Bison (Grammaire Attribuée)
-- Écrire une **grammaire attribuée** pour le langage Atlas à l'aide de **Bison**.
-- Enrichir la grammaire par les **actions sémantiques** (vérifications de types, gestion de la TS).
-- Générer le code objet dans un fichier `.map`.
+### 6.2 Compiler with Bison (Attributed Grammar)
+- Write an **attributed grammar** for the Atlas language using **Bison**.
+- Enrich the grammar with **semantic actions** (type checks, ST management).
+- Generate object code in a `.map` file.
 
-### 6.3 Analyseur Lexical avec Flex
-- Écrire un **analyseur lexical** pour le langage Atlas à l'aide de **Flex**.
-- Reconnaître les tokens : mots-clés, identifiants, entiers, opérateurs, etc.
+### 6.3 Lexical Analyzer with Flex
+- Write a **lexical analyzer** for the Atlas language using **Flex**.
+- Recognize tokens: keywords, identifiers, integers, operators, etc.
 
-### 6.4 Programme Principal
-- Écrire un **programme principal** qui :
-  1. Affiche le code objet MAP d'un programme source Atlas.
-  2. Exécute ce code MAP via le simulateur.
+### 6.4 Main Program
+- Write a **main program** that:
+  1. Displays the MAP object code of an Atlas source program.
+  2. Executes this MAP code via the simulator.
 
 ---
 
-## 7. Résumé de l'Architecture du Projet
+## 7. Project Architecture Summary
 
 ```
 prog.atlas
     │
     ▼
-[Flex : Analyseur Lexical]
+[Flex: Lexical Analyzer]
     │ tokens
     ▼
-[Bison : Analyseur Syntaxique + Sémantique]
-    │ actions sémantiques + Table des Symboles
+[Bison: Syntax + Semantic Analyzer]
+    │ semantic actions + Symbol Table
     ▼
-[Génération de Code] ──→ prog.map
+[Code Generation] ──→ prog.map
     │
     ▼
-[Simulateur MAP en C]
+[MAP Simulator in C]
     │
     ▼
-Résultat d'exécution
+Execution Result
 ```
 
 ---
 
-*Rapport généré à partir des documents du cours — Analyse Sémantique et Génération de Code, Langage Atlas / MAP.*
+*Report generated from course documents — Semantic Analysis and Code Generation, Atlas / MAP Language.*
