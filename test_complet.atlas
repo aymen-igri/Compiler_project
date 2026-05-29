@@ -9,7 +9,7 @@ programme test_complet ;
 const
     ent max    = 100 ;
     ent min    = 10 * 2 ;
-    bool existe = 0 ;   // faux
+    bool existe = faux ;   // faux
 
 // --- Declaration de variables ---
 var

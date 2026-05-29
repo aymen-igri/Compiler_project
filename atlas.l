@@ -301,7 +301,6 @@ COMMENTAIRE "//"[^\n]*
    PROGRAMME PRINCIPAL (mode test autonome uniquement)
    Quand couplé à Bison, ce main() est désactivé.
    ───────────────────────────────────────────────────────── */
-#ifndef AVEC_BISON
 
 /* Noms des tokens pour l'affichage */
 const char *nom_token(int tok) {
@@ -363,7 +362,8 @@ const char *nom_token(int tok) {
     }
 }
 
-int main(int argc, char *argv[]) {
+#if 0 /* Disabled - using Bison main instead */
+int main(int argc, char *argv[]) { 
     FILE *f = NULL;
 
     if (argc >= 2) {
@@ -408,4 +408,4 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-#endif /* ifndef AVEC_BISON */
+#endif

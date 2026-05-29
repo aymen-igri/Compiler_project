@@ -39,23 +39,28 @@ void valeur_pile()
 void affect()
 {
     pile[pile[ip - 1]] = pile[ip];
+    ip -= 2;
 }
 void ecrire()
 {
     printf("%d", pile[ip]);
+    ip--;
 }
 void ecrireRC()
 {
     printf("%d\n", pile[ip]);
+    ip--;
 }
 void lire()
 {
     scanf("%d", &pile[pile[ip]]);
+    ip--;
 }
 void lireRC()
 {
     scanf("%d", &pile[pile[ip]]);
     printf("\n");
+    ip--;
 }
 void valabs()
 {
@@ -167,6 +172,8 @@ void bsf(int etiq)
     CO = (pile[ip] == 0) ? etiq : CO + 1;
     ip--;
 }
+/* main removed to avoid conflict with generated code */
+#if 0
 int main() {
     ouverture_bloc();      // 1
     reserver_var(3);       // 2  - reserves a(0), b(1), c(2)
@@ -187,3 +194,4 @@ int main() {
     fermeture_bloc();      // 18
     return 0;
 }
+#endif
