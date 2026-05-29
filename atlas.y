@@ -117,6 +117,7 @@ int chercher_var(const char *nom);
 %type <ival> loop_start
 %type <ival> cond_tantque
 %type <ival> else_marker
+%type <ival> pour_opt_step
 
 %%
 /* =======================================================
@@ -129,9 +130,14 @@ programme:
     declarations
     TOK_DEBUT
     instructions
-    TOK_FIN TOK_POINT
+    TOK_FIN optional_point
     {
     }
+    ;
+
+optional_point:
+    /* vide */
+    | TOK_POINT
     ;
 
 // Declaration section
@@ -286,6 +292,11 @@ cond_si:
          $$ = code_idx;
          generer("bsf(0000);");
      }
+     | TOK_SI expr TOK_ALORS
+     {
+         $$ = code_idx;
+         generer("bsf(0000);");
+     }
      ;
 
 else_marker:
@@ -298,17 +309,72 @@ else_marker:
      ;
 
 instr_pour:
-     TOK_POUR TOK_IDENTIFIANT TOK_DEPUIS expr TOK_JUSQUA expr TOK_FAIRE
-     instructions
-     TOK_FPOUR
-     {
-     }
-     | TOK_POUR TOK_IDENTIFIANT TOK_DEPUIS expr TOK_JUSQUA expr TOK_PARPAS expr TOK_FAIRE
-       instructions
-       TOK_FPOUR
-     {
-     }
-     ;
+    TOK_POUR TOK_IDENTIFIANT TOK_DEPUIS expr
+    {
+        int adr = chercher_var($2);
+        char buf[256];
+        sprintf(buf, "empiler_adr(%d);", adr); generer(buf);
+        generer("affect();");
+        $<ival>$ = adr; // $5: loop var address
+    }
+    TOK_JUSQUA expr
+    {
+        int slot = adresse_var++;
+        char buf[256];
+        sprintf(buf, "empiler_adr(%d);", slot); generer(buf);
+        generer("affect();");
+        $<ival>$ = slot; // $7: limit slot
+    }
+    pour_opt_step
+    {
+        $<ival>$ = code_idx; // $9: START OF LOOP LABEL
+    }
+    {
+        char buf[256];
+        sprintf(buf, "empiler_adr(%d); valeur_pile();", $<ival>5); generer(buf);
+        sprintf(buf, "empiler_adr(%d); valeur_pile();", $<ival>7); generer(buf);
+        generer("pp_egal();");
+        $<ival>$ = code_idx; // $10: BSF index
+        generer("bsf(0000);");
+    }
+    TOK_FAIRE instructions TOK_FPOUR
+    {
+        char buf[256];
+        // Increment: var = var + step
+        sprintf(buf, "empiler_adr(%d); empiler_adr(%d); valeur_pile();", $<ival>5, $<ival>5); generer(buf);
+        sprintf(buf, "empiler_adr(%d); valeur_pile();", $<ival>8); generer(buf);
+        generer("plus(); affect();");
+        
+        // Jump back
+        sprintf(buf, "goto L%d;", $<ival>9); generer(buf);
+        
+        // Patch exit
+        patcher($<ival>10, code_idx);
+    }
+    ;
+
+pour_opt_step:
+    /* vide */
+    {
+        int slot = adresse_var++;
+        char buf[256];
+        sprintf(buf, "empiler_adr(%d); empiler_val(1); affect();", slot);
+        generer(buf);
+        $$ = slot;
+    }
+    | TOK_PARPAS expr
+    {
+        int slot = adresse_var++;
+        char buf[256];
+        sprintf(buf, "empiler_adr(%d);", slot);
+        generer(buf);
+        // Step expr is already on stack
+        generer("affect();");
+        $$ = slot;
+    }
+    ;
+
+
 
 instr_tantque:
      loop_start cond_tantque instructions TOK_FTQ
@@ -329,6 +395,11 @@ loop_start:
 
 cond_tantque:
      TOK_PAREN_OUV expr TOK_PAREN_FERM TOK_FAIRE
+     {
+         $$ = code_idx;
+         generer("bsf(0000);");
+     }
+     | expr TOK_FAIRE
      {
          $$ = code_idx;
          generer("bsf(0000);");

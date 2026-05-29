@@ -43,21 +43,27 @@ void affect()
 }
 void ecrire()
 {
-    printf("%d", pile[ip]);
+    printf("%d ", pile[ip]);
     ip--;
+    fflush(stdout);
 }
 void ecrireRC()
 {
     printf("%d\n", pile[ip]);
     ip--;
+    fflush(stdout);
 }
 void lire()
 {
+    printf("? ");
+    fflush(stdout);
     scanf("%d", &pile[pile[ip]]);
     ip--;
 }
 void lireRC()
 {
+    printf("? ");
+    fflush(stdout);
     scanf("%d", &pile[pile[ip]]);
     printf("\n");
     ip--;
@@ -153,10 +159,12 @@ void pp_egal()
 void imprimer(char *text)
 {
     printf("%s ", text);
+    fflush(stdout);
 }
 void imprimerRC(char *text)
 {
     printf("%s\n", text);
+    fflush(stdout);
 }
 void bra(int etiq)
 {
