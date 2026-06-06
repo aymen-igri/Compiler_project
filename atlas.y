@@ -319,11 +319,11 @@ instr_pour:
     }
     TOK_JUSQUA expr
     {
-        int slot = adresse_var++;
+        int adr = chercher_var($2);
         char buf[256];
-        sprintf(buf, "empiler_adr(%d);", slot); generer(buf);
+        sprintf(buf, "empiler_adr(%d);", adr); generer(buf);
         generer("affect();");
-        $<ival>$ = slot; // $7: limit slot
+        $<ival>$ = adr; // $7: limit slot
     }
     pour_opt_step
     {
