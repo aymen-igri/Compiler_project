@@ -39,13 +39,35 @@ void patcher(int label, int target) {
 typedef struct {
     char nom[64];
     int type;
+    int data_type;
     int adresse;
     int valeur;
 } Variable;
 
+int get_data_type(const char *nom) {
+    for (int i = 0; i < nb_vars; i++) {
+        if (strcmp(variables[i].nom, nom) == 0)
+            return variables[i].data_type;
+    }
+    return -1;
+}
+
+int is_const(const char *nom) {
+    for (int i = 0; i < nb_vars; i++) {
+        if (strcmp(variables[i].nom, nom) == 0)
+            return variables[i].type == 1;
+    }
+    return -1;
+}
+
+const char* type_name(int t) {
+    return t == 1 ? "ent" : (t == 2 ? "bool" : "inconnu");
+}
+
 Variable variables[100];
 int nb_vars = 0;
 int adresse_var = 0;
+int current_dec_type = 0;
 
 int etiq = 0;
 
@@ -163,11 +185,11 @@ declarations:
 const_item:
      TOK_ENT TOK_IDENTIFIANT TOK_EGAL const_expr TOK_POINT_VIRGULE
      {
-         ajouter_var($2, 1, $4);
+         ajouter_var($2, 1, $4, 1);
      }
      | TOK_BOOL TOK_IDENTIFIANT TOK_EGAL TOK_BOOLEEN TOK_POINT_VIRGULE
      {
-         ajouter_var($2, 1, $4);
+         ajouter_var($2, 1, $4, 2);
      }
      ;
      
@@ -195,18 +217,18 @@ const_expr:
      ;
  
  type:
-     TOK_ENT  { $$ = 1; }
-     | TOK_BOOL { $$ = 2; }
+     TOK_ENT  { $$ = 1; current_dec_type = 1; }
+     | TOK_BOOL { $$ = 2; current_dec_type = 2; }
      ;
  
  var_list:
      TOK_IDENTIFIANT
      {
-         ajouter_var($1, 0, 0);
+         ajouter_var($1, 0, 0, current_dec_type);
      }
      | var_list TOK_VIRGULE TOK_IDENTIFIANT
      {
-         ajouter_var($3, 0, 0);
+         ajouter_var($3, 0, 0, current_dec_type);
      }
      ;
 
@@ -227,6 +249,10 @@ instruction:
 instr_io:
      TOK_LIRE TOK_IDENTIFIANT
      {
+         if (is_const($2)) {
+             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: 'lire' ne peut pas modifier une constante '%s'\n", yylineno, $2);
+             exit(1);
+         }
          char buf[256];
          sprintf(buf, "empiler_adr(%d);", chercher_var($2));
          generer(buf);
@@ -234,6 +260,10 @@ instr_io:
      }
      | TOK_LIRERC TOK_IDENTIFIANT
      {
+         if (is_const($2)) {
+             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: 'lireRC' ne peut pas modifier une constante '%s'\n", yylineno, $2);
+             exit(1);
+         }
          char buf[256];
          sprintf(buf, "empiler_adr(%d);", chercher_var($2));
          generer(buf);
@@ -265,12 +295,26 @@ instr_affectation:
      TOK_IDENTIFIANT TOK_AFFECT 
      {
          int idx = chercher_var($1);
+         if (idx == -1) {
+            fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: variable '%s' non declarée\n", yylineno, $1);
+            exit(1);
+         } else if (is_const($1)) {
+            fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: tentative d'affectation a une constante '%s'\n", yylineno, $1);
+            exit(1);
+         }
          char buf[256];
          sprintf(buf, "empiler_adr(%d);", idx);
          generer(buf);
+         $<ival>$ = get_data_type($1);
      }
      expr
      {
+         int expected_type = $<ival>$;
+         if ($4 != expected_type && expected_type != -1) {
+             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: type incompatible dans l'affectation (attendu: %s, trouve: %s)\n",
+                                 yylineno, type_name(expected_type), type_name($4));
+            exit(1);
+         }
          generer("affect();");
      }
      ;
@@ -289,11 +333,19 @@ instr_si:
 cond_si:
      TOK_SI TOK_PAREN_OUV expr TOK_PAREN_FERM TOK_ALORS
      {
+         if ($3 != 2) {
+            fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: la condition du 'si' doit etre un booleen\n", yylineno);
+            exit(1);
+         }
          $$ = code_idx;
          generer("bsf(0000);");
      }
      | TOK_SI expr TOK_ALORS
      {
+         if ($2 != 2) {
+            fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: la condition du 'si' doit etre un booleen\n", yylineno);
+            exit(1);
+         }
          $$ = code_idx;
          generer("bsf(0000);");
      }
@@ -396,11 +448,19 @@ loop_start:
 cond_tantque:
      TOK_PAREN_OUV expr TOK_PAREN_FERM TOK_FAIRE
      {
+         if ($2 != 2) {
+             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: la condition du 'tantque' doit etre un booleen\n", yylineno);
+             exit(1);
+         }
          $$ = code_idx;
          generer("bsf(0000);");
      }
      | expr TOK_FAIRE
      {
+         if ($2 != 2) {
+             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: la condition du 'tantque' doit etre un booleen\n", yylineno);
+             exit(1);
+         }
          $$ = code_idx;
          generer("bsf(0000);");
      }
@@ -419,14 +479,14 @@ expr:
          char buf[256];
          sprintf(buf, "empiler_val(%d);", $1);
          generer(buf);
-         $$ = $1;
+         $$ = 1;
      }
      | TOK_BOOLEEN
      {
          char buf[256];
          sprintf(buf, "empiler_val(%d);", $1);
          generer(buf);
-         $$ = $1;
+         $$ = 2;
      }
      | TOK_IDENTIFIANT
      {
@@ -444,64 +504,96 @@ expr:
              char buf[256];
              sprintf(buf, "empiler_val(%d);", variables[idx].valeur);
              generer(buf);
-             $$ = variables[idx].valeur;
+             $$ = variables[idx].data_type;
          } else { /* variable */
              char buf[256];
              sprintf(buf, "empiler_adr(%d);", variables[idx].adresse);
              generer(buf);
              generer("valeur_pile();");
-             $$ = 0;
+             $$ = variables[idx].data_type;
          }
      }
      | expr TOK_PLUS expr
      {
-         generer("plus();");
-         $$ = 0;
+        if ($1 != 1 || $3 != 1) {
+            fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur '+' requiert des entiers\n", yylineno);
+            exit(1);
+        }
+        generer("plus();");
+        $$ = 1;  // result is entier
      }
      | expr TOK_MOINS expr
      {
+         if ($1 != 1 || $3 != 1) {
+             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur '-' requiert des entiers\n", yylineno);
+             exit(1);
+         }
          generer("moins();");
-         $$ = 0;
+         $$ = 1;
      }
      | expr TOK_MULT expr
      {
+         if ($1 != 1 || $3 != 1) {
+             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur '*' requiert des entiers\n", yylineno);
+             exit(1);
+         }
          generer("mult();");
-         $$ = 0;
+         $$ = 1;
      }
      | expr TOK_DIV expr
      {
+         if ($1 != 1 || $3 != 1) {
+             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur '/' requiert des entiers\n", yylineno);
+             exit(1);
+         }
          generer("division();");
-         $$ = 0;
+         $$ = 1;
      }
      | expr TOK_MOD expr
      {
+         if ($1 != 1 || $3 != 1) {
+             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur '%%' requiert des entiers\n", yylineno);
+             exit(1);
+         }
          generer("mod();");
-         $$ = 0;
+         $$ = 1;
      }
      | expr TOK_PUISS expr
      {
+         if ($1 != 1 || $3 != 1) {
+             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur 'puiss' requiert des entiers\n", yylineno);
+             exit(1);
+         }
          generer("puiss();");
-         $$ = 0;
+         $$ = 1;
      }
      | TOK_VALABS TOK_PAREN_OUV expr TOK_PAREN_FERM
      {
+         if ($3 != 1) {
+             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur 'valabs' requiert des entiers\n", yylineno);
+             exit(1);
+         }
          generer("valabs();");
-         $$ = 0;
+         $$ = 1;
      }
      | TOK_MOINS expr %prec UMINUS
      {
+         if ($2 != 1) {
+             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur '-' requiert des entiers\n", yylineno);
+             exit(1);
+         }
          generer("neg();");
-         $$ = 0;
+         $$ = 1;
      }
      | expr TOK_EGAL expr
      {
          generer("egal();");
-         $$ = 0;
+         $$ = 2;
      }
      | expr TOK_DIFF expr
      {
          generer("dif();");
-         $$ = 0;
+         $$ = 2;
      }
      | expr TOK_INF expr
      {
@@ -511,32 +603,44 @@ expr:
      | expr TOK_SUP expr
      {
          generer("pgs();");
-         $$ = 0;
+         $$ = 2;
      }
      | expr TOK_INF_EG expr
      {
          generer("pp_egal();");
-         $$ = 0;
+         $$ = 2;
      }
      | expr TOK_SUP_EG expr
      {
          generer("pg_egal();");
-         $$ = 0;
+         $$ = 2;
      }
      | expr TOK_ET expr
      {
+         if ($1 != 2 || $3 != 2) {
+            fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur 'et' requiert des booleens\n", yylineno);
+            exit(1);
+         }
          generer("et();");
-         $$ = 0;
+         $$ = 2;
      }
      | expr TOK_OU expr
      {
+         if ($1 != 2 || $3 != 2) {
+            fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur 'ou' requiert des booleens\n", yylineno);
+            exit(1);
+         }
          generer("ou();");
-         $$ = 0;
+         $$ = 2;
      }
      | TOK_NON expr %prec UNOT
      {
+         if ($1 != 2 || $3 != 2) {
+            fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur 'non' requiert un booleen\n", yylineno);
+            exit(1);
+         }
          generer("non();");
-         $$ = 0;
+         $$ = 2;
      }
      | TOK_PAREN_OUV expr TOK_PAREN_FERM
      {
@@ -549,17 +653,18 @@ expr:
     FONCTIONS UTILITAIRES
     ════════════════════════════════════════════════════════ */
 
-int ajouter_var(const char *nom, int is_const, int valeur) {
+int ajouter_var(const char *nom, int is_const, int valeur, int data_type) {
      if (nb_vars >= 100) {
          fprintf(stderr, "Erreur : trop de variables\n");
          return -1;
      }
      strcpy(variables[nb_vars].nom, nom);
      variables[nb_vars].type = is_const;
+     variables[nb_vars].data_type = data_type;
      variables[nb_vars].adresse = adresse_var;
      variables[nb_vars].valeur = valeur;
 
-     if (!is_const) {  /* Only reserve space for variables, not constants */
+     if (!is_const) {
          adresse_var++;
      }
 
