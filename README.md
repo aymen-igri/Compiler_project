@@ -1,6 +1,6 @@
 # Welcome to the Atlas Compiler Project!
 
-This project is a complete compiler for the **Atlas Language**, translating source code into intermediate **MAP** (Machine À Pile) code and executing it via a custom C-based virtual machine simulator.
+This project is a complete compiler for the **Atlas Language**, translating source code into intermediate **MAP** (Machine À Pile / Stack Machine) code and executing it via an integrated virtual machine simulator.
 
 ---
 
@@ -14,78 +14,100 @@ Ensure you have the following tools installed on your Linux system:
 
 ---
 
-## 2. Getting Started
+## 2. Directory Structure
 
-The easiest way to interact with the project is using the provided `Makefile`.
+The project follows a clean, modular architecture:
 
-### Build the Compiler
-To generate the `atlas` compiler executable, run:
+```text
+Compiler_project/
+├── bin/                    # Compiled executable (atlas)
+│   └── atlas
+├── examples/               # Sample Atlas source programs
+│   ├── factoriel.atlas     # Factorial calculation example
+│   ├── somme.atlas         # Simple addition example
+│   └── test2.atlas         # Comprehensive test of all features
+├── includes/               # Shared header files
+│   └── atlas.h             # Compiler/Simulator shared definitions
+├── src/                    # Compiler source code
+│   ├── atlas.l             # Flex: Lexical analyzer
+│   ├── atlas.y             # Bison: Syntax & Semantic analyzer
+│   ├── main.c              # Integrated CLI & Execution engine
+│   └── simulator.c         # Machine À Pile (MAP) VM logic
+├── Makefile                # Build orchestration script
+├── README.md               # This documentation
+└── SPEC.md                 # Language & VM specifications
+```
+
+- **src/**: Contains the core implementation of the compiler and virtual machine.
+- **includes/**: Shared data structures (like the symbol table and instruction set).
+- **bin/**: Where the final `atlas` tool is generated after running `make`.
+- **examples/**: Pre-written programs to demonstrate the language capabilities.
+
+---
+
+## 3. Getting Started
+
+The project uses an integrated **"All-in-One"** binary. When you compile an Atlas file, it generates the `.map` instructions AND immediately executes them.
+
+### Build the Project
+To compile the `bin/atlas` tool, run:
 ```bash
 make
 ```
 
-### Clean Temporary Files
-To remove all generated files and start fresh:
+### Clean Workspace
+To remove all generated binaries, temporary build files, and `.map` files:
 ```bash
 make clean
 ```
 
 ---
 
-## 3. Compiling and Running Atlas Code
+## 4. Compiling and Running Atlas Code
 
-You can test any `.atlas` file using these simple commands. Replace `filename.atlas` with your actual file path.
-
-### Option A: Standard Run (Recommended)
-This compiles your Atlas code and runs it immediately. This is the most common command you will use:
+### Integrated Compilation & Execution
+This is the standard way to run an Atlas program. It will compile to MAP, save the `.map` file, and then execute it:
 ```bash
-make run FILE=TestProgram/factoriel.atlas
+./bin/atlas examples/factoriel.atlas
+```
+*Alternatively, you can use the Makefile shortcut:*
+```bash
+make run FILE=examples/factoriel.atlas
 ```
 
-### Option B: Debug / Test Mode
-This shows you the **Intermediate MAP Code** (machine instructions) first, and then runs the program. Great for seeing how the compiler works:
+### View Intermediate MAP Code
+If you want to see the generated machine instructions without executing the program:
 ```bash
-make test FILE=TestProgram/somme.atlas
+make map FILE=examples/factoriel.atlas
 ```
 
-### Option C: Only show MAP Code
-If you only want to see the generated instructions without executing them:
-```bash
-make map FILE=TestProgram/test1.atlas
-```
-
-### Option D: Manual Compilation
-If you want to compile now but run later:
-```bash
-make compile FILE=TestProgram/somme.atlas
-# Then later run:
-./result
-```
+### Input Prompt
+When a program requires input (e.g., `lire n;`), it will display a blue prompt:
+`[INPUT] > `
+Simply type your integer and press **Enter**.
 
 ---
 
-## 4. Atlas Language Syntax Features
+## 5. Atlas Language Features
 
-The Atlas compiler supports:
-- **Variables & Constants**: Declare `ent` (integers) and `bool` (booleans).
+- **Variables & Constants**: Support for `ent` (integers) and `bool` (booleans).
 - **Arithmetic**: Full support for `+`, `-`, `*`, `/`, `%`, `puiss`, and `valabs()`.
 - **Logic**: Boolean operations using `et`, `ou`, and `non`.
 - **Control Flow**:
-    - `si ... alors ... [sinon] ... fsi` (Conditions)
-    - `tantque ... faire ... ftq` (While loops)
-    - `pour ... depuis ... jusqua ... [parpas ...] faire ... fpour` (For loops)
-- **Flexible Syntax**: Parentheses for conditions and the trailing dot after `fin` are **optional**.
+    - `si ... alors ... [sinon] ... fsi` (Supports nested conditionals).
+    - `tantque ... faire ... ftq` (While loops).
+    - `pour ... depuis ... jusqua ... [parpas ...] faire ... fpour` (For loops with optional steps).
+- **Semantic Safety**: Includes type checking, constant protection, and duplicate declaration detection.
 
 ---
 
-## 5. Directory Structure
+## 6. Technical Specifications
 
-- `atlas.l`: Flex lexical analyzer.
-- `atlas.y`: Bison parser and code generator.
-- `simulator.c`: The virtual machine that runs the compiled code.
-- `Makefile`: Automation scripts for building and testing.
-- `TestProgram/`: A collection of sample Atlas programs (somme, factoriel, etc.).
+For developers interested in the internal logic, semantic rules, and the target VM instruction set, please refer to the [SPEC.md](SPEC.md) file. It contains:
+- **Language Grammar**: Detailed rules for Atlas syntax.
+- **Semantic Rules**: Type checking, constant management, and symbol table logic.
+- **MAP Instruction Set**: A complete reference for all Stack Machine instructions and their C implementation details.
 
 ---
 
-**Enjoy coding with Atlas!** 
+**Enjoy coding with Atlas!**

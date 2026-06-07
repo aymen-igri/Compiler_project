@@ -1,5 +1,6 @@
+#line 1 "src/lex.yy.c"
 
-#line 2 "lex.yy.c"
+#line 3 "src/lex.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -601,7 +602,7 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "atlas.l"
+#line 1 "src/atlas.l"
 /*
  * ============================================================
  *  Analyseur lexical du langage Atlas
@@ -620,7 +621,7 @@ char *yytext;
  *    gcc -o atlas atlas.tab.c lex.yy.c -lm
  * ============================================================
  */
-#line 21 "atlas.l"
+#line 21 "src/atlas.l"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -684,7 +685,7 @@ int num_ligne = 1;
 /* Prototypes internes */
 void erreur_lex(const char *msg);
 
-#line 687 "lex.yy.c"
+#line 688 "src/lex.yy.c"
 /* ─────────────────────────────────────────────────────────
    OPTIONS FLEX
    ───────────────────────────────────────────────────────── */
@@ -692,7 +693,7 @@ void erreur_lex(const char *msg);
 /* ─────────────────────────────────────────────────────────
    DÉFINITIONS (abréviations pour les règles)
    ───────────────────────────────────────────────────────── */
-#line 695 "lex.yy.c"
+#line 696 "src/lex.yy.c"
 
 #define INITIAL 0
 
@@ -907,15 +908,15 @@ YY_DECL
 		}
 
 	{
-#line 107 "atlas.l"
+#line 107 "src/atlas.l"
 
 
-#line 110 "atlas.l"
+#line 110 "src/atlas.l"
  /* ═══════════════════════════════════════════════════════
     1. COMMENTAIRES et ESPACES  (ignorés)
     ═══════════════════════════════════════════════════════ */
 
-#line 918 "lex.yy.c"
+#line 919 "src/lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -984,18 +985,18 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 114 "atlas.l"
+#line 114 "src/atlas.l"
 { /* commentaire de fin de ligne → ignorer */ }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 115 "atlas.l"
+#line 115 "src/atlas.l"
 { /* espaces / tabulations → ignorer       */ }
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 116 "atlas.l"
+#line 116 "src/atlas.l"
 { num_ligne++; }
 	YY_BREAK
 /* ═══════════════════════════════════════════════════════
@@ -1003,27 +1004,27 @@ YY_RULE_SETUP
     ═══════════════════════════════════════════════════════ */
 case 4:
 YY_RULE_SETUP
-#line 123 "atlas.l"
+#line 123 "src/atlas.l"
 { return TOK_PROGRAMME;  }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 124 "atlas.l"
+#line 124 "src/atlas.l"
 { return TOK_VAR;        }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 125 "atlas.l"
+#line 125 "src/atlas.l"
 { return TOK_CONST;      }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 126 "atlas.l"
+#line 126 "src/atlas.l"
 { return TOK_DEBUT;      }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 127 "atlas.l"
+#line 127 "src/atlas.l"
 { return TOK_FIN;        }
 	YY_BREAK
 /* ═══════════════════════════════════════════════════════
@@ -1031,12 +1032,12 @@ YY_RULE_SETUP
     ═══════════════════════════════════════════════════════ */
 case 9:
 YY_RULE_SETUP
-#line 134 "atlas.l"
+#line 134 "src/atlas.l"
 { return TOK_ENT;  }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 135 "atlas.l"
+#line 135 "src/atlas.l"
 { return TOK_BOOL; }
 	YY_BREAK
 /* ═══════════════════════════════════════════════════════
@@ -1044,37 +1045,37 @@ YY_RULE_SETUP
     ═══════════════════════════════════════════════════════ */
 case 11:
 YY_RULE_SETUP
-#line 142 "atlas.l"
+#line 142 "src/atlas.l"
 { return TOK_LIRERC;      }   /* lireRC avant lire ! */
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 143 "atlas.l"
+#line 143 "src/atlas.l"
 { return TOK_LIRE;        }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 144 "atlas.l"
+#line 144 "src/atlas.l"
 { return TOK_ECRIRERC;    }   /* ecrireRC avant ecrire ! */
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 145 "atlas.l"
+#line 145 "src/atlas.l"
 { return TOK_ECRIRE;      }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 146 "atlas.l"
+#line 146 "src/atlas.l"
 { return TOK_IMPRIMERRC;  }   /* imprimerRC avant imprimer ! */
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 147 "atlas.l"
+#line 147 "src/atlas.l"
 { return TOK_IMPRIMER;    }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 148 "atlas.l"
+#line 148 "src/atlas.l"
 { return TOK_PASSER;      }
 	YY_BREAK
 /* ═══════════════════════════════════════════════════════
@@ -1082,62 +1083,62 @@ YY_RULE_SETUP
     ═══════════════════════════════════════════════════════ */
 case 18:
 YY_RULE_SETUP
-#line 155 "atlas.l"
+#line 155 "src/atlas.l"
 { return TOK_SI;     }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 156 "atlas.l"
+#line 156 "src/atlas.l"
 { return TOK_ALORS;  }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 157 "atlas.l"
+#line 157 "src/atlas.l"
 { return TOK_SINON;  }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 158 "atlas.l"
+#line 158 "src/atlas.l"
 { return TOK_FSI;    }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 160 "atlas.l"
+#line 160 "src/atlas.l"
 { return TOK_POUR;   }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 161 "atlas.l"
+#line 161 "src/atlas.l"
 { return TOK_DEPUIS; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 162 "atlas.l"
+#line 162 "src/atlas.l"
 { return TOK_JUSQUA; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 163 "atlas.l"
+#line 163 "src/atlas.l"
 { return TOK_PARPAS; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 164 "atlas.l"
+#line 164 "src/atlas.l"
 { return TOK_FAIRE;  }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 165 "atlas.l"
+#line 165 "src/atlas.l"
 { return TOK_FPOUR;  }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 167 "atlas.l"
+#line 167 "src/atlas.l"
 { return TOK_TANTQUE; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 168 "atlas.l"
+#line 168 "src/atlas.l"
 { return TOK_FTQ;     }
 	YY_BREAK
 /* ═══════════════════════════════════════════════════════
@@ -1145,17 +1146,17 @@ YY_RULE_SETUP
     ═══════════════════════════════════════════════════════ */
 case 30:
 YY_RULE_SETUP
-#line 175 "atlas.l"
+#line 175 "src/atlas.l"
 { return TOK_ET;  }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 176 "atlas.l"
+#line 176 "src/atlas.l"
 { return TOK_OU;  }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 177 "atlas.l"
+#line 177 "src/atlas.l"
 { return TOK_NON; }
 	YY_BREAK
 /* ═══════════════════════════════════════════════════════
@@ -1163,12 +1164,12 @@ YY_RULE_SETUP
     ═══════════════════════════════════════════════════════ */
 case 33:
 YY_RULE_SETUP
-#line 184 "atlas.l"
+#line 184 "src/atlas.l"
 { return TOK_PUISS;  }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 185 "atlas.l"
+#line 185 "src/atlas.l"
 { return TOK_VALABS; }
 	YY_BREAK
 /* ═══════════════════════════════════════════════════════
@@ -1176,7 +1177,7 @@ YY_RULE_SETUP
     ═══════════════════════════════════════════════════════ */
 case 35:
 YY_RULE_SETUP
-#line 192 "atlas.l"
+#line 192 "src/atlas.l"
 {
 #ifdef AVEC_BISON
                   yylval.ival = 1;
@@ -1188,7 +1189,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 201 "atlas.l"
+#line 201 "src/atlas.l"
 {
 #ifdef AVEC_BISON
                   yylval.ival = 0;
@@ -1203,7 +1204,7 @@ YY_RULE_SETUP
     ═══════════════════════════════════════════════════════ */
 case 37:
 YY_RULE_SETUP
-#line 215 "atlas.l"
+#line 215 "src/atlas.l"
 {
 #ifdef AVEC_BISON
                   yylval.ival = atoi(yytext);
@@ -1220,7 +1221,7 @@ YY_RULE_SETUP
 case 38:
 /* rule 38 can match eol */
 YY_RULE_SETUP
-#line 230 "atlas.l"
+#line 230 "src/atlas.l"
 {
                   /* Extraire le contenu sans les apostrophes */
                   int len = strlen(yytext) - 2;
@@ -1240,7 +1241,7 @@ YY_RULE_SETUP
     ═══════════════════════════════════════════════════════ */
 case 39:
 YY_RULE_SETUP
-#line 249 "atlas.l"
+#line 249 "src/atlas.l"
 {
 #ifdef AVEC_BISON
                   strncpy(yylval.sval, yytext, 63);
@@ -1257,89 +1258,89 @@ YY_RULE_SETUP
     ═══════════════════════════════════════════════════════ */
 case 40:
 YY_RULE_SETUP
-#line 265 "atlas.l"
+#line 265 "src/atlas.l"
 { return TOK_AFFECT;        }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 266 "atlas.l"
+#line 266 "src/atlas.l"
 { return TOK_PLUS;          }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 267 "atlas.l"
+#line 267 "src/atlas.l"
 { return TOK_MOINS;         }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 268 "atlas.l"
+#line 268 "src/atlas.l"
 { return TOK_MULT;          }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 269 "atlas.l"
+#line 269 "src/atlas.l"
 { return TOK_DIV;           }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 270 "atlas.l"
+#line 270 "src/atlas.l"
 { return TOK_MOD;           }
 	YY_BREAK
 /* Opérateurs de comparaison (ordre important : <> avant < et >) */
 case 46:
 YY_RULE_SETUP
-#line 273 "atlas.l"
+#line 273 "src/atlas.l"
 { return TOK_DIFF;   }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 274 "atlas.l"
+#line 274 "src/atlas.l"
 { return TOK_INF_EG; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 275 "atlas.l"
+#line 275 "src/atlas.l"
 { return TOK_SUP_EG; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 276 "atlas.l"
+#line 276 "src/atlas.l"
 { return TOK_INF;    }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 277 "atlas.l"
+#line 277 "src/atlas.l"
 { return TOK_SUP;    }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 278 "atlas.l"
+#line 278 "src/atlas.l"
 { return TOK_EGAL;   }
 	YY_BREAK
 /* Ponctuation */
 case 52:
 YY_RULE_SETUP
-#line 281 "atlas.l"
+#line 281 "src/atlas.l"
 { return TOK_POINT_VIRGULE; }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 282 "atlas.l"
+#line 282 "src/atlas.l"
 { return TOK_VIRGULE;       }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 283 "atlas.l"
+#line 283 "src/atlas.l"
 { return TOK_POINT;         }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 284 "atlas.l"
+#line 284 "src/atlas.l"
 { return TOK_PAREN_OUV;     }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 285 "atlas.l"
+#line 285 "src/atlas.l"
 { return TOK_PAREN_FERM;    }
 	YY_BREAK
 /* ═══════════════════════════════════════════════════════
@@ -1347,7 +1348,7 @@ YY_RULE_SETUP
     ═══════════════════════════════════════════════════════ */
 case 57:
 YY_RULE_SETUP
-#line 292 "atlas.l"
+#line 292 "src/atlas.l"
 {
                   fprintf(stderr,
                     "[ERREUR LEXICALE] ligne %d : caractere illegal '%s'\n",
@@ -1357,10 +1358,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 299 "atlas.l"
+#line 299 "src/atlas.l"
 ECHO;
 	YY_BREAK
-#line 1363 "lex.yy.c"
+#line 1364 "src/lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2336,7 +2337,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 299 "atlas.l"
+#line 299 "src/atlas.l"
 
 
 /* ─────────────────────────────────────────────────────────

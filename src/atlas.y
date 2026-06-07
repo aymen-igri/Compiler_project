@@ -24,9 +24,9 @@ int generer_label() {
  /* Patch branch instruction */
 void patcher(int label, int target) {
     if (strncmp(code[label].instruction, "bsf", 3) == 0) {
-        sprintf(code[label].instruction, "bsf %d", target);
+        sprintf(code[label].instruction, "bsf %d", target + 1);
     } else if (strncmp(code[label].instruction, "bra", 3) == 0) {
-        sprintf(code[label].instruction, "bra %d", target);
+        sprintf(code[label].instruction, "bra %d", target + 1);
     }
 }
 
@@ -394,7 +394,7 @@ instr_pour:
     }
     pour_opt_step
     {
-        $<ival>$ = code_idx; // $13: START OF LOOP LABEL
+        $<ival>$ = code_idx; // $13: START OF LOOP LABEL (the comparison)
     }
     {
         char buf[256];
@@ -427,8 +427,8 @@ instr_pour:
         generer("plus");
         generer("affect");
         
-        // Jump back
-        sprintf(buf, "bra %d", $<ival>13); 
+        // Jump back to comparison
+        sprintf(buf, "bra %d", $<ival>13 + 1); 
         generer(buf);
         
         // Patch exit

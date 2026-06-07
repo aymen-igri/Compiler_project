@@ -6,9 +6,9 @@
 6	valeur-pile
 7	empiler-val 0
 8	pps
-9	bsf 11
+9	bsf 12
 10	imprimer impossible
-11	bra 48
+11	bra 49
 12	empiler-adr 1
 13	empiler-val 1
 14	affect
@@ -27,7 +27,7 @@
 27	empiler-adr 3
 28	valeur-pile
 29	pp-egal
-30	bsf 45
+30	bsf 46
 31	empiler-adr 1
 32	empiler-adr 1
 33	valeur-pile
@@ -42,7 +42,7 @@
 42	valeur-pile
 43	plus
 44	affect
-45	bra 24
+45	bra 25
 46	empiler-adr 1
 47	valeur-pile
 48	ecrire

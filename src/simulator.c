@@ -55,16 +55,20 @@ void ecrireRC()
 }
 void lire()
 {
-    printf("? ");
+    printf("\033[1;34m[INPUT]\033[0m > ");
     fflush(stdout);
-    scanf("%d", &pile[pile[ip]]);
+    if (scanf("%d", &pile[pile[ip]]) != 1) {
+        fprintf(stderr, "Error: Invalid input\n");
+    }
     ip--;
 }
 void lireRC()
 {
-    printf("? ");
+    printf("\033[1;34m[INPUT]\033[0m > ");
     fflush(stdout);
-    scanf("%d", &pile[pile[ip]]);
+    if (scanf("%d", &pile[pile[ip]]) != 1) {
+        fprintf(stderr, "Error: Invalid input\n");
+    }
     printf("\n");
     ip--;
 }

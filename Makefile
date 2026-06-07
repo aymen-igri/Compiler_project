@@ -1,38 +1,40 @@
 CC = gcc
-CFLAGS = -lm -DAVEC_BISON
+CFLAGS = -Iincludes -lm -DAVEC_BISON
 LEX = flex
 YACC = bison
 YFLAGS = -d
 
-all: atlas map_interpreter
+# Target directories
+SRC_DIR = src
+BIN_DIR = bin
 
-atlas: atlas.tab.c lex.yy.c main.c
-	$(CC) -o atlas main.c atlas.tab.c lex.yy.c $(CFLAGS)
+all: $(BIN_DIR)/atlas
 
-atlas.tab.c atlas.tab.h: atlas.y
-	$(YACC) $(YFLAGS) atlas.y
+$(BIN_DIR)/atlas: $(SRC_DIR)/atlas.tab.c $(SRC_DIR)/lex.yy.c $(SRC_DIR)/main.c $(SRC_DIR)/simulator.c
+	@mkdir -p $(BIN_DIR)
+	$(CC) -o $@ $^ $(CFLAGS)
 
-lex.yy.c: atlas.l atlas.tab.h
-	$(LEX) atlas.l
+$(SRC_DIR)/atlas.tab.c $(SRC_DIR)/atlas.tab.h: $(SRC_DIR)/atlas.y
+	$(YACC) $(YFLAGS) -o $(SRC_DIR)/atlas.tab.c $<
 
-map_interpreter: map_interpreter.c simulator.c
-	$(CC) -o map_interpreter map_interpreter.c $(CFLAGS)
+$(SRC_DIR)/lex.yy.c: $(SRC_DIR)/atlas.l $(SRC_DIR)/atlas.tab.h
+	$(LEX) -o $@ $<
 
-# Compile Atlas to MAP and execute
-run: atlas map_interpreter
-	./atlas $(FILE)
-	./map_interpreter $(basename $(FILE)).map
+# Run command (Example: make run FILE=examples/factoriel.atlas)
+run: all
+	./$(BIN_DIR)/atlas $(FILE)
 
-# Show MAP code
-map: atlas
-	./atlas $(FILE)
-	@echo "--- Generated MAP Code ---"
+# Show generated MAP code without executing
+map: all
+	@./$(BIN_DIR)/atlas $(FILE) > /dev/null
 	@cat $(basename $(FILE)).map
-	@echo "------------------------"
 
+# Full cleanup: removes all binaries and old root junk
 clean:
-	rm -f atlas atlas.tab.c atlas.tab.h lex.yy.c map_interpreter
-	rm -f *.map
-	rm -f *.o
+	rm -rf $(BIN_DIR)
+	rm -f $(SRC_DIR)/*.tab.c $(SRC_DIR)/*.tab.h $(SRC_DIR)/lex.yy.c
+	rm -f *.map examples/*.map
+	@# Remove legacy root files
+	rm -f atlas atlas.tab.c atlas.tab.h lex.yy.c map_interpreter map_interpreter.c simulator.c simulator.exe out.c final.c final_test2.c atlas_lex lex_test debug_parse* test_lex* test_tokens*
 
-.PHONY: all clean run map
+.PHONY: all clean run
