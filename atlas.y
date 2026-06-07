@@ -57,7 +57,7 @@ int is_const(const char *nom) {
         if (strcmp(variables[i].nom, nom) == 0)
             return variables[i].type == 1;
     }
-    return -1;
+    return 0;
 }
 
 const char* type_name(int t) {
@@ -68,13 +68,14 @@ Variable variables[100];
 int nb_vars = 0;
 int adresse_var = 0;
 int current_dec_type = 0;
+int current_bsf_index = 0;
 
 int etiq = 0;
 
 void yyerror(const char *msg);
 int yylex();
 
-int ajouter_var(const char *nom, int type, int valeur);
+int ajouter_var(const char *nom, int type, int data_type, int valeur);
 int chercher_var(const char *nom);
 
 %}
@@ -339,6 +340,7 @@ cond_si:
          }
          $$ = code_idx;
          generer("bsf(0000);");
+         current_bsf_index = $$;
      }
      | TOK_SI expr TOK_ALORS
      {
@@ -348,6 +350,7 @@ cond_si:
          }
          $$ = code_idx;
          generer("bsf(0000);");
+         current_bsf_index = $$;
      }
      ;
 
@@ -356,26 +359,39 @@ else_marker:
      {
          $$ = code_idx;
          generer("bra(0000);");
-         patcher($<ival>-1, code_idx); // patch the bsf from cond_si
+         patcher(current_bsf_index, code_idx); // patch the bsf from cond_si
      }
      ;
 
 instr_pour:
-    TOK_POUR TOK_IDENTIFIANT TOK_DEPUIS expr
+    TOK_POUR TOK_IDENTIFIANT
     {
-        int adr = chercher_var($2);
-        char buf[256];
-        sprintf(buf, "empiler_adr(%d);", adr); generer(buf);
-        generer("affect();");
-        $<ival>$ = adr; // $5: loop var address
+        $<ival>$ = chercher_var($2);
     }
-    TOK_JUSQUA expr
+    TOK_DEPUIS 
     {
-        int adr = chercher_var($2);
         char buf[256];
-        sprintf(buf, "empiler_adr(%d);", adr); generer(buf);
+        sprintf(buf, "empiler_adr(%d);", $<ival>3); 
+        generer(buf);
+        
+    }
+    expr
+    {
         generer("affect();");
-        $<ival>$ = adr; // $7: limit slot
+        $<ival>$ = $<ival>3; // $5: loop var address
+    }
+    TOK_JUSQUA 
+    {
+        int slot = addresse_var++;
+        char buf[256];
+        sprintf(buf, "empiler_adr(%d);", slot); 
+        generer(buf);
+        $<ival>$ = slot;
+    }
+    expr
+    {
+        generer("affect();");
+        $$ = $<ival>2; // $7: limit slot
     }
     pour_opt_step
     {
@@ -383,7 +399,7 @@ instr_pour:
     }
     {
         char buf[256];
-        sprintf(buf, "empiler_adr(%d); valeur_pile();", $<ival>5); generer(buf);
+        sprintf(buf, "empiler_adr(%d); valeur_pile();", $<ival>3); generer(buf);
         sprintf(buf, "empiler_adr(%d); valeur_pile();", $<ival>7); generer(buf);
         generer("pp_egal();");
         $<ival>$ = code_idx; // $10: BSF index
@@ -393,15 +409,18 @@ instr_pour:
     {
         char buf[256];
         // Increment: var = var + step
-        sprintf(buf, "empiler_adr(%d); empiler_adr(%d); valeur_pile();", $<ival>5, $<ival>5); generer(buf);
-        sprintf(buf, "empiler_adr(%d); valeur_pile();", $<ival>8); generer(buf);
+        sprintf(buf, "empiler_adr(%d); empiler_adr(%d); valeur_pile();", $<ival>3, $<ival>3); 
+        generer(buf);
+        sprintf(buf, "empiler_adr(%d); valeur_pile();", $11); 
+        generer(buf);
         generer("plus(); affect();");
         
         // Jump back
-        sprintf(buf, "goto L%d;", $<ival>9); generer(buf);
+        sprintf(buf, "goto L%d;", $<ival>13); 
+        generer(buf);
         
         // Patch exit
-        patcher($<ival>10, code_idx);
+        patcher($<ival>14, code_idx);
     }
     ;
 
@@ -414,15 +433,18 @@ pour_opt_step:
         generer(buf);
         $$ = slot;
     }
-    | TOK_PARPAS expr
+    | TOK_PARPAS 
     {
         int slot = adresse_var++;
         char buf[256];
         sprintf(buf, "empiler_adr(%d);", slot);
         generer(buf);
-        // Step expr is already on stack
-        generer("affect();");
         $$ = slot;
+    }
+    expr
+    {
+        generer("affect();");
+        $$ = $<ival>2;
     }
     ;
 
@@ -598,7 +620,7 @@ expr:
      | expr TOK_INF expr
      {
          generer("pps();");
-         $$ = 0;
+         $$ = 2;
      }
      | expr TOK_SUP expr
      {
@@ -635,7 +657,7 @@ expr:
      }
      | TOK_NON expr %prec UNOT
      {
-         if ($1 != 2 || $3 != 2) {
+         if ($2 != 2) {
             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur 'non' requiert un booleen\n", yylineno);
             exit(1);
          }
@@ -658,6 +680,12 @@ int ajouter_var(const char *nom, int is_const, int valeur, int data_type) {
          fprintf(stderr, "Erreur : trop de variables\n");
          return -1;
      }
+
+     if (chercher_var(nom) != -1) {
+         fprintf(stderr, "Erreur : variable '%s' deja declaree\n", nom);
+         return -1;
+     }
+
      strcpy(variables[nb_vars].nom, nom);
      variables[nb_vars].type = is_const;
      variables[nb_vars].data_type = data_type;
