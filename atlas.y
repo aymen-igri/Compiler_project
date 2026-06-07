@@ -29,9 +29,9 @@ int generer_label() {
  /* Patch branch instruction */
 void patcher(int label, int target) {
     if (strncmp(code[label].instruction, "bsf", 3) == 0) {
-        sprintf(code[label].instruction, "if (pile[ip--] == 0) goto L%d;", target);
+        sprintf(code[label].instruction, "bsf %d", target);
     } else if (strncmp(code[label].instruction, "bra", 3) == 0) {
-        sprintf(code[label].instruction, "goto L%d;", target);
+        sprintf(code[label].instruction, "bra %d", target);
     }
 }
 
@@ -43,6 +43,12 @@ typedef struct {
     int adresse;
     int valeur;
 } Variable;
+
+Variable variables[100];
+int nb_vars = 0;
+int adresse_var = 0;
+int current_dec_type = 0;
+int current_bsf_index = 0;
 
 int get_data_type(const char *nom) {
     for (int i = 0; i < nb_vars; i++) {
@@ -63,12 +69,6 @@ int is_const(const char *nom) {
 const char* type_name(int t) {
     return t == 1 ? "ent" : (t == 2 ? "bool" : "inconnu");
 }
-
-Variable variables[100];
-int nb_vars = 0;
-int adresse_var = 0;
-int current_dec_type = 0;
-int current_bsf_index = 0;
 
 int etiq = 0;
 
@@ -255,9 +255,10 @@ instr_io:
              exit(1);
          }
          char buf[256];
-         sprintf(buf, "empiler_adr(%d);", chercher_var($2));
+         sprintf(buf, "empiler-adr %d", chercher_var($2));
+         
          generer(buf);
-         generer("lire();");
+         generer("lire");
      }
      | TOK_LIRERC TOK_IDENTIFIANT
      {
@@ -266,28 +267,28 @@ instr_io:
              exit(1);
          }
          char buf[256];
-         sprintf(buf, "empiler_adr(%d);", chercher_var($2));
+         sprintf(buf, "empiler-adr %d", chercher_var($2));
          generer(buf);
-         generer("lireRC();");
+         generer("lireRC");
      }
      | TOK_ECRIRE expr
      {
-         generer("ecrire();");
+         generer("ecrire");
      }
      | TOK_ECRIRERC expr
      {
-         generer("ecrireRC();");
+         generer("ecrireRC");
      }
      | TOK_IMPRIMER TOK_CHAINE
      {
          char buf[256];
-         sprintf(buf, "imprimer(\"%s\");", $2);
+         sprintf(buf, "imprimer %s", $2);
          generer(buf);
      }
      | TOK_IMPRIMERRC TOK_CHAINE
      {
          char buf[256];
-         sprintf(buf, "imprimerRC(\"%s\");", $2);
+         sprintf(buf, "imprimerRC %s", $2);
          generer(buf);
      }
      ;
@@ -304,7 +305,7 @@ instr_affectation:
             exit(1);
          }
          char buf[256];
-         sprintf(buf, "empiler_adr(%d);", idx);
+         sprintf(buf, "empiler-adr %d", idx);
          generer(buf);
          $<ival>$ = get_data_type($1);
      }
@@ -316,7 +317,7 @@ instr_affectation:
                                  yylineno, type_name(expected_type), type_name($4));
             exit(1);
          }
-         generer("affect();");
+         generer("affect");
      }
      ;
 
@@ -339,7 +340,7 @@ cond_si:
             exit(1);
          }
          $$ = code_idx;
-         generer("bsf(0000);");
+         generer("bsf 0");
          current_bsf_index = $$;
      }
      | TOK_SI expr TOK_ALORS
@@ -349,7 +350,7 @@ cond_si:
             exit(1);
          }
          $$ = code_idx;
-         generer("bsf(0000);");
+         generer("bsf 0");
          current_bsf_index = $$;
      }
      ;
@@ -358,7 +359,7 @@ else_marker:
      TOK_SINON
      {
          $$ = code_idx;
-         generer("bra(0000);");
+         generer("bra 0");
          patcher(current_bsf_index, code_idx); // patch the bsf from cond_si
      }
      ;
@@ -371,27 +372,27 @@ instr_pour:
     TOK_DEPUIS 
     {
         char buf[256];
-        sprintf(buf, "empiler_adr(%d);", $<ival>3); 
+        sprintf(buf, "empiler-adr %d", $<ival>3); 
         generer(buf);
         
     }
     expr
     {
-        generer("affect();");
+        generer("affect");
         $<ival>$ = $<ival>3; // $5: loop var address
     }
     TOK_JUSQUA 
     {
-        int slot = addresse_var++;
+        int slot = adresse_var++;
         char buf[256];
-        sprintf(buf, "empiler_adr(%d);", slot); 
+        sprintf(buf, "empiler-adr %d", slot); 
         generer(buf);
         $<ival>$ = slot;
     }
     expr
     {
-        generer("affect();");
-        $$ = $<ival>2; // $7: limit slot
+        generer("affect");
+        $<ival>$ = $<ival>2; // $7: limit slot
     }
     pour_opt_step
     {
@@ -399,24 +400,31 @@ instr_pour:
     }
     {
         char buf[256];
-        sprintf(buf, "empiler_adr(%d); valeur_pile();", $<ival>3); generer(buf);
-        sprintf(buf, "empiler_adr(%d); valeur_pile();", $<ival>7); generer(buf);
-        generer("pp_egal();");
+        sprintf(buf, "empiler-adr %d", $<ival>3); 
+        generer(buf);
+        generer("valeur-pile");
+        
+        sprintf(buf, "empiler-adr %d", $<ival>9); 
+        generer(buf);
+        generer("valeur-pile");
+        generer("pp-egal");
         $<ival>$ = code_idx; // $10: BSF index
-        generer("bsf(0000);");
+        generer("bsf 0");
     }
     TOK_FAIRE instructions TOK_FPOUR
     {
         char buf[256];
         // Increment: var = var + step
-        sprintf(buf, "empiler_adr(%d); empiler_adr(%d); valeur_pile();", $<ival>3, $<ival>3); 
+        sprintf(buf, "empiler-adr %d", $<ival>3); 
         generer(buf);
-        sprintf(buf, "empiler_adr(%d); valeur_pile();", $11); 
+        sprintf(buf, "empiler-adr %d", $<ival>7); 
         generer(buf);
-        generer("plus(); affect();");
+        generer("valeur-pile");
+        generer("plus");
+        generer("affect");
         
         // Jump back
-        sprintf(buf, "goto L%d;", $<ival>13); 
+        sprintf(buf, "bra %d", $<ival>13); 
         generer(buf);
         
         // Patch exit
@@ -429,21 +437,23 @@ pour_opt_step:
     {
         int slot = adresse_var++;
         char buf[256];
-        sprintf(buf, "empiler_adr(%d); empiler_val(1); affect();", slot);
+        sprintf(buf, "empiler-adr %d", slot);
         generer(buf);
+        generer("empiler-val 1");
+        generer("affect");
         $$ = slot;
     }
     | TOK_PARPAS 
     {
         int slot = adresse_var++;
         char buf[256];
-        sprintf(buf, "empiler_adr(%d);", slot);
+        sprintf(buf, "empiler-adr %d", slot);
         generer(buf);
-        $$ = slot;
+        $<ival>$ = slot;
     }
     expr
     {
-        generer("affect();");
+        generer("affect");
         $$ = $<ival>2;
     }
     ;
@@ -454,7 +464,7 @@ instr_tantque:
      loop_start cond_tantque instructions TOK_FTQ
      {
          char buf[256];
-         sprintf(buf, "goto L%d;", $1);
+         sprintf(buf, "bra %d", $1);
          generer(buf);
          patcher($2, code_idx);
      }
@@ -475,16 +485,16 @@ cond_tantque:
              exit(1);
          }
          $$ = code_idx;
-         generer("bsf(0000);");
+         generer("bsf 0");
      }
      | expr TOK_FAIRE
      {
-         if ($2 != 2) {
+         if ($1 != 2) {
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: la condition du 'tantque' doit etre un booleen\n", yylineno);
              exit(1);
          }
          $$ = code_idx;
-         generer("bsf(0000);");
+         generer("bsf 0");
      }
      ;
 
@@ -499,14 +509,14 @@ expr:
      TOK_ENTIER
      {
          char buf[256];
-         sprintf(buf, "empiler_val(%d);", $1);
+         sprintf(buf, "empiler-val %d", $1);
          generer(buf);
          $$ = 1;
      }
      | TOK_BOOLEEN
      {
          char buf[256];
-         sprintf(buf, "empiler_val(%d);", $1);
+         sprintf(buf, "empiler-val %d", $1);
          generer(buf);
          $$ = 2;
      }
@@ -524,14 +534,14 @@ expr:
              $$ = 0;
          } else if (variables[idx].type == 1) { /* constante */
              char buf[256];
-             sprintf(buf, "empiler_val(%d);", variables[idx].valeur);
+             sprintf(buf, "empiler-val %d", variables[idx].valeur);
              generer(buf);
              $$ = variables[idx].data_type;
          } else { /* variable */
              char buf[256];
-             sprintf(buf, "empiler_adr(%d);", variables[idx].adresse);
+             sprintf(buf, "empiler-adr %d", variables[idx].adresse);
              generer(buf);
-             generer("valeur_pile();");
+             generer("valeur-pile");
              $$ = variables[idx].data_type;
          }
      }
@@ -541,7 +551,7 @@ expr:
             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur '+' requiert des entiers\n", yylineno);
             exit(1);
         }
-        generer("plus();");
+        generer("plus");
         $$ = 1;  // result is entier
      }
      | expr TOK_MOINS expr
@@ -550,7 +560,7 @@ expr:
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur '-' requiert des entiers\n", yylineno);
              exit(1);
          }
-         generer("moins();");
+         generer("moins");
          $$ = 1;
      }
      | expr TOK_MULT expr
@@ -559,7 +569,7 @@ expr:
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur '*' requiert des entiers\n", yylineno);
              exit(1);
          }
-         generer("mult();");
+         generer("mult");
          $$ = 1;
      }
      | expr TOK_DIV expr
@@ -568,7 +578,7 @@ expr:
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur '/' requiert des entiers\n", yylineno);
              exit(1);
          }
-         generer("division();");
+         generer("division");
          $$ = 1;
      }
      | expr TOK_MOD expr
@@ -577,7 +587,7 @@ expr:
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur '%%' requiert des entiers\n", yylineno);
              exit(1);
          }
-         generer("mod();");
+         generer("mod");
          $$ = 1;
      }
      | expr TOK_PUISS expr
@@ -586,7 +596,7 @@ expr:
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur 'puiss' requiert des entiers\n", yylineno);
              exit(1);
          }
-         generer("puiss();");
+         generer("puiss");
          $$ = 1;
      }
      | TOK_VALABS TOK_PAREN_OUV expr TOK_PAREN_FERM
@@ -595,7 +605,7 @@ expr:
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur 'valabs' requiert des entiers\n", yylineno);
              exit(1);
          }
-         generer("valabs();");
+         generer("valabs");
          $$ = 1;
      }
      | TOK_MOINS expr %prec UMINUS
@@ -604,37 +614,37 @@ expr:
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur '-' requiert des entiers\n", yylineno);
              exit(1);
          }
-         generer("neg();");
+         generer("neg");
          $$ = 1;
      }
      | expr TOK_EGAL expr
      {
-         generer("egal();");
+         generer("egal");
          $$ = 2;
      }
      | expr TOK_DIFF expr
      {
-         generer("dif();");
+         generer("dif");
          $$ = 2;
      }
      | expr TOK_INF expr
      {
-         generer("pps();");
+         generer("pps");
          $$ = 2;
      }
      | expr TOK_SUP expr
      {
-         generer("pgs();");
+         generer("pgs");
          $$ = 2;
      }
      | expr TOK_INF_EG expr
      {
-         generer("pp_egal();");
+         generer("pp-egal");
          $$ = 2;
      }
      | expr TOK_SUP_EG expr
      {
-         generer("pg_egal();");
+         generer("pg-egal");
          $$ = 2;
      }
      | expr TOK_ET expr
@@ -643,7 +653,7 @@ expr:
             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur 'et' requiert des booleens\n", yylineno);
             exit(1);
          }
-         generer("et();");
+         generer("et");
          $$ = 2;
      }
      | expr TOK_OU expr
@@ -652,7 +662,7 @@ expr:
             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur 'ou' requiert des booleens\n", yylineno);
             exit(1);
          }
-         generer("ou();");
+         generer("ou");
          $$ = 2;
      }
      | TOK_NON expr %prec UNOT
@@ -661,7 +671,7 @@ expr:
             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur 'non' requiert un booleen\n", yylineno);
             exit(1);
          }
-         generer("non();");
+         generer("non");
          $$ = 2;
      }
      | TOK_PAREN_OUV expr TOK_PAREN_FERM
@@ -729,19 +739,26 @@ int main(int argc, char *argv[]) {
     int result = yyparse();
 
     if (result == 0) {
-        printf("#include \"simulator.c\"\n\n");
-        printf("int main() {\n");
-        printf("    ouverture_bloc();\n");
-        printf("    reserver_var(%d);\n", adresse_var);
-        
-        /* Output generated instructions with labels */
-        for (int i = 0; i < code_idx; i++) {
-            printf("L%d: %s\n", i, code[i].instruction);
+        char map_fileName[256];
+        if (argc >= 2) {
+            strcpy(map_fileName, argv[1]);
+            char *dot = strrchr(map_fileName, '.');
+            if (dot) strcpy(dot, ".map");
+            else strcat(map_fileName, ".map");
+        } else {
+            strcpy(map_fileName, "output.map");
+        }
+        FILE *map_file = fopen(map_fileName, "w");
+        if (!map_file) {
+            fprintf(stderr, "Impossible de creer : %s\n", map_fileName);
+            return 1;
         }
         
-        printf("L%d: fermeture_bloc();\n", code_idx);
-        printf("    return 0;\n");
-        printf("}\n");
+        for (int i = 0; i < code_idx; i++) {
+            fprintf(map_file, "%d\t%s\n", i + 1, code[i].instruction);
+        }
+        fclose(map_file);
+        printf("MAP code generated: %s\n", map_fileName);
     }
 
     if (f) fclose(f);

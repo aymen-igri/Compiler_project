@@ -1,12 +1,10 @@
-# Makefile for Atlas Compiler
-
 CC = gcc
-CFLAGS = -lm -DAVEC_BISON
+CFLAGS = -lm
 LEX = flex
 YACC = bison
 YFLAGS = -d
 
-all: atlas
+all: atlas map_interpreter
 
 atlas: atlas.tab.c lex.yy.c
 	$(CC) -o atlas atlas.tab.c lex.yy.c $(CFLAGS)
@@ -17,32 +15,24 @@ atlas.tab.c atlas.tab.h: atlas.y
 lex.yy.c: atlas.l atlas.tab.h
 	$(LEX) atlas.l
 
-# Default file if none is specified
-FILE = test_complet.atlas
+map_interpreter: map_interpreter.c simulator.c
+	$(CC) -o map_interpreter map_interpreter.c $(CFLAGS)
 
-# Target to compile a specific Atlas file
-compile: atlas
-	./atlas $(FILE) > final.c
-	$(CC) final.c -o result
-
-# Target to show the generated MAP code (intermediate code)
-map: atlas
-	@echo "--- Intermediate MAP Code for $(FILE) ---"
+# Compile Atlas to MAP and execute
+run: atlas map_interpreter
 	./atlas $(FILE)
-	@echo "----------------------------------------"
+	./map_interpreter $(basename $(FILE)).map
 
-# Target to compile and run immediately
-run: compile
-	./result
-
-# Target for quick verification (shows MAP then Runs)
-test: map compile
-	@echo "--- Execution Result ---"
-	./result
+# Show MAP code
+map: atlas
+	./atlas $(FILE)
+	@echo "--- Generated MAP Code ---"
+	@cat $(basename $(FILE)).map
 	@echo "------------------------"
 
 clean:
-	rm -f atlas atlas.tab.c atlas.tab.h lex.yy.c final.c result out.c lex_test
+	rm -f atlas atlas.tab.c atlas.tab.h lex.yy.c map_interpreter
+	rm -f *.map
 	rm -f *.o
 
-.PHONY: all clean test
+.PHONY: all clean run map

@@ -118,7 +118,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 60 "atlas.y"
+#line 83 "atlas.y"
 
  int ival;
  char sval[256];
