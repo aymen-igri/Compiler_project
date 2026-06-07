@@ -73,14 +73,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "atlas.h"
 
-extern FILE *yyin;
 extern int yylineno;
-
-/* Code generation */
-typedef struct {
-    char instruction[256];
-} Instruction;
 
 Instruction code[10000];
 int code_idx = 0;
@@ -151,7 +146,7 @@ int chercher_var(const char *nom);
 int chercher_var_silence(const char *nom);
 
 
-#line 155 "atlas.tab.c"
+#line 150 "atlas.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -667,15 +662,15 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   156,   156,   153,   169,   171,   175,   177,   181,   182,
-     186,   190,   191,   195,   199,   206,   207,   208,   209,   210,
-     211,   212,   216,   220,   221,   225,   229,   230,   234,   238,
-     246,   247,   250,   251,   252,   253,   254,   255,   259,   271,
-     282,   286,   290,   296,   306,   305,   333,   338,   337,   350,
-     359,   372,   376,   382,   387,   396,   401,   404,   371,   446,
-     457,   456,   475,   485,   492,   501,   513,   520,   527,   534,
-     559,   568,   577,   586,   595,   604,   613,   622,   631,   636,
-     641,   646,   651,   656,   661,   670,   679,   688
+       0,   151,   151,   148,   164,   166,   170,   172,   176,   177,
+     181,   185,   186,   190,   194,   201,   202,   203,   204,   205,
+     206,   207,   211,   215,   216,   220,   224,   225,   229,   233,
+     241,   242,   245,   246,   247,   248,   249,   250,   254,   266,
+     277,   281,   285,   291,   301,   300,   328,   333,   332,   345,
+     354,   367,   371,   377,   382,   391,   396,   399,   366,   441,
+     452,   451,   470,   480,   487,   496,   508,   515,   522,   529,
+     554,   563,   572,   581,   590,   599,   608,   617,   626,   631,
+     636,   641,   646,   651,   656,   665,   674,   683
 };
 #endif
 
@@ -1406,112 +1401,112 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* $@1: %empty  */
-#line 156 "atlas.y"
+#line 151 "atlas.y"
     {
         generer("ouverture-bloc");
         char buf[256];
         sprintf(buf, "reserver-var %d", adresse_var);
         generer(buf);
     }
-#line 1417 "atlas.tab.c"
+#line 1412 "atlas.tab.c"
     break;
 
   case 3: /* programme: TOK_PROGRAMME TOK_IDENTIFIANT TOK_POINT_VIRGULE declarations TOK_DEBUT $@1 instructions TOK_FIN optional_point  */
-#line 164 "atlas.y"
+#line 159 "atlas.y"
     {
         generer("fermeture-bloc");
     }
-#line 1425 "atlas.tab.c"
+#line 1420 "atlas.tab.c"
     break;
 
   case 13: /* const_item: TOK_ENT TOK_IDENTIFIANT TOK_EGAL const_expr TOK_POINT_VIRGULE  */
-#line 196 "atlas.y"
+#line 191 "atlas.y"
      {
          ajouter_var((yyvsp[-3].sval), 1, (yyvsp[-1].ival), 1);
      }
-#line 1433 "atlas.tab.c"
+#line 1428 "atlas.tab.c"
     break;
 
   case 14: /* const_item: TOK_BOOL TOK_IDENTIFIANT TOK_EGAL TOK_BOOLEEN TOK_POINT_VIRGULE  */
-#line 200 "atlas.y"
+#line 195 "atlas.y"
      {
          ajouter_var((yyvsp[-3].sval), 1, (yyvsp[-1].ival), 2);
      }
-#line 1441 "atlas.tab.c"
+#line 1436 "atlas.tab.c"
     break;
 
   case 15: /* const_expr: TOK_ENTIER  */
-#line 206 "atlas.y"
+#line 201 "atlas.y"
                 { (yyval.ival) = (yyvsp[0].ival); }
-#line 1447 "atlas.tab.c"
+#line 1442 "atlas.tab.c"
     break;
 
   case 16: /* const_expr: const_expr TOK_PLUS const_expr  */
-#line 207 "atlas.y"
+#line 202 "atlas.y"
                                       { (yyval.ival) = (yyvsp[-2].ival) + (yyvsp[0].ival); }
-#line 1453 "atlas.tab.c"
+#line 1448 "atlas.tab.c"
     break;
 
   case 17: /* const_expr: const_expr TOK_MOINS const_expr  */
-#line 208 "atlas.y"
+#line 203 "atlas.y"
                                        { (yyval.ival) = (yyvsp[-2].ival) - (yyvsp[0].ival); }
-#line 1459 "atlas.tab.c"
+#line 1454 "atlas.tab.c"
     break;
 
   case 18: /* const_expr: const_expr TOK_MULT const_expr  */
-#line 209 "atlas.y"
+#line 204 "atlas.y"
                                       { (yyval.ival) = (yyvsp[-2].ival) * (yyvsp[0].ival); }
-#line 1465 "atlas.tab.c"
+#line 1460 "atlas.tab.c"
     break;
 
   case 19: /* const_expr: const_expr TOK_DIV const_expr  */
-#line 210 "atlas.y"
+#line 205 "atlas.y"
                                      { (yyval.ival) = (yyvsp[-2].ival) / (yyvsp[0].ival); }
-#line 1471 "atlas.tab.c"
+#line 1466 "atlas.tab.c"
     break;
 
   case 20: /* const_expr: const_expr TOK_MOD const_expr  */
-#line 211 "atlas.y"
+#line 206 "atlas.y"
                                      { (yyval.ival) = (yyvsp[-2].ival) % (yyvsp[0].ival); }
-#line 1477 "atlas.tab.c"
+#line 1472 "atlas.tab.c"
     break;
 
   case 21: /* const_expr: TOK_PAREN_OUV const_expr TOK_PAREN_FERM  */
-#line 212 "atlas.y"
+#line 207 "atlas.y"
                                                { (yyval.ival) = (yyvsp[-1].ival); }
-#line 1483 "atlas.tab.c"
+#line 1478 "atlas.tab.c"
     break;
 
   case 26: /* type: TOK_ENT  */
-#line 229 "atlas.y"
+#line 224 "atlas.y"
               { (yyval.ival) = 1; current_dec_type = 1; }
-#line 1489 "atlas.tab.c"
+#line 1484 "atlas.tab.c"
     break;
 
   case 27: /* type: TOK_BOOL  */
-#line 230 "atlas.y"
+#line 225 "atlas.y"
                 { (yyval.ival) = 2; current_dec_type = 2; }
-#line 1495 "atlas.tab.c"
+#line 1490 "atlas.tab.c"
     break;
 
   case 28: /* var_list: TOK_IDENTIFIANT  */
-#line 235 "atlas.y"
+#line 230 "atlas.y"
      {
          ajouter_var((yyvsp[0].sval), 0, 0, current_dec_type);
      }
-#line 1503 "atlas.tab.c"
+#line 1498 "atlas.tab.c"
     break;
 
   case 29: /* var_list: var_list TOK_VIRGULE TOK_IDENTIFIANT  */
-#line 239 "atlas.y"
+#line 234 "atlas.y"
      {
          ajouter_var((yyvsp[0].sval), 0, 0, current_dec_type);
      }
-#line 1511 "atlas.tab.c"
+#line 1506 "atlas.tab.c"
     break;
 
   case 38: /* instr_io: TOK_LIRE TOK_IDENTIFIANT  */
-#line 260 "atlas.y"
+#line 255 "atlas.y"
      {
          if (is_const((yyvsp[0].sval))) {
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: 'lire' ne peut pas modifier une constante '%s'\n", yylineno, (yyvsp[0].sval));
@@ -1523,11 +1518,11 @@ yyreduce:
          generer(buf);
          generer("lire");
      }
-#line 1527 "atlas.tab.c"
+#line 1522 "atlas.tab.c"
     break;
 
   case 39: /* instr_io: TOK_LIRERC TOK_IDENTIFIANT  */
-#line 272 "atlas.y"
+#line 267 "atlas.y"
      {
          if (is_const((yyvsp[0].sval))) {
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: 'lireRC' ne peut pas modifier une constante '%s'\n", yylineno, (yyvsp[0].sval));
@@ -1538,47 +1533,47 @@ yyreduce:
          generer(buf);
          generer("lireRC");
      }
-#line 1542 "atlas.tab.c"
+#line 1537 "atlas.tab.c"
     break;
 
   case 40: /* instr_io: TOK_ECRIRE expr  */
-#line 283 "atlas.y"
+#line 278 "atlas.y"
      {
          generer("ecrire");
      }
-#line 1550 "atlas.tab.c"
+#line 1545 "atlas.tab.c"
     break;
 
   case 41: /* instr_io: TOK_ECRIRERC expr  */
-#line 287 "atlas.y"
+#line 282 "atlas.y"
      {
          generer("ecrireRC");
      }
-#line 1558 "atlas.tab.c"
+#line 1553 "atlas.tab.c"
     break;
 
   case 42: /* instr_io: TOK_IMPRIMER TOK_CHAINE  */
-#line 291 "atlas.y"
+#line 286 "atlas.y"
      {
          char buf[256];
          sprintf(buf, "imprimer %s", (yyvsp[0].sval));
          generer(buf);
      }
-#line 1568 "atlas.tab.c"
+#line 1563 "atlas.tab.c"
     break;
 
   case 43: /* instr_io: TOK_IMPRIMERRC TOK_CHAINE  */
-#line 297 "atlas.y"
+#line 292 "atlas.y"
      {
          char buf[256];
          sprintf(buf, "imprimerRC %s", (yyvsp[0].sval));
          generer(buf);
      }
-#line 1578 "atlas.tab.c"
+#line 1573 "atlas.tab.c"
     break;
 
   case 44: /* @2: %empty  */
-#line 306 "atlas.y"
+#line 301 "atlas.y"
      {
          int idx = chercher_var((yyvsp[-1].sval));
          if (idx == -1) {
@@ -1593,11 +1588,11 @@ yyreduce:
          generer(buf);
          (yyval.ival) = get_data_type((yyvsp[-1].sval));
      }
-#line 1597 "atlas.tab.c"
+#line 1592 "atlas.tab.c"
     break;
 
   case 45: /* instr_affectation: TOK_IDENTIFIANT TOK_AFFECT @2 expr  */
-#line 321 "atlas.y"
+#line 316 "atlas.y"
      {
          int expected_type = (yyvsp[-1].ival);
          if ((yyvsp[0].ival) != expected_type && expected_type != -1) {
@@ -1607,37 +1602,37 @@ yyreduce:
          }
          generer("affect");
      }
-#line 1611 "atlas.tab.c"
+#line 1606 "atlas.tab.c"
     break;
 
   case 46: /* instr_si: cond_si instructions TOK_FSI  */
-#line 334 "atlas.y"
+#line 329 "atlas.y"
      {
          patcher((yyvsp[-2].ival), code_idx);
      }
-#line 1619 "atlas.tab.c"
+#line 1614 "atlas.tab.c"
     break;
 
   case 47: /* @3: %empty  */
-#line 338 "atlas.y"
+#line 333 "atlas.y"
        {
            (yyval.ival) = code_idx;
            generer("bra 0");
            patcher((yyvsp[-2].ival), code_idx);
        }
-#line 1629 "atlas.tab.c"
+#line 1624 "atlas.tab.c"
     break;
 
   case 48: /* instr_si: cond_si instructions TOK_SINON @3 instructions TOK_FSI  */
-#line 344 "atlas.y"
+#line 339 "atlas.y"
      {
          patcher((yyvsp[-2].ival), code_idx);
      }
-#line 1637 "atlas.tab.c"
+#line 1632 "atlas.tab.c"
     break;
 
   case 49: /* cond_si: TOK_SI TOK_PAREN_OUV expr TOK_PAREN_FERM TOK_ALORS  */
-#line 351 "atlas.y"
+#line 346 "atlas.y"
      {
          if ((yyvsp[-2].ival) != 2) {
             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: la condition du 'si' doit etre un booleen\n", yylineno);
@@ -1646,11 +1641,11 @@ yyreduce:
          generer("bsf 0");
          (yyval.ival) = code_idx -1;
      }
-#line 1650 "atlas.tab.c"
+#line 1645 "atlas.tab.c"
     break;
 
   case 50: /* cond_si: TOK_SI expr TOK_ALORS  */
-#line 360 "atlas.y"
+#line 355 "atlas.y"
      {
          if ((yyvsp[-1].ival) != 2) {
             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: la condition du 'si' doit etre un booleen\n", yylineno);
@@ -1659,38 +1654,38 @@ yyreduce:
          (yyval.ival) = code_idx;
          generer("bsf 0");
      }
-#line 1663 "atlas.tab.c"
+#line 1658 "atlas.tab.c"
     break;
 
   case 51: /* @4: %empty  */
-#line 372 "atlas.y"
+#line 367 "atlas.y"
     {
         (yyval.ival) = chercher_var((yyvsp[0].sval));
     }
-#line 1671 "atlas.tab.c"
+#line 1666 "atlas.tab.c"
     break;
 
   case 52: /* $@5: %empty  */
-#line 376 "atlas.y"
+#line 371 "atlas.y"
     {
         char buf[256];
         sprintf(buf, "empiler-adr %d", (yyvsp[-1].ival)); 
         generer(buf);
     }
-#line 1681 "atlas.tab.c"
+#line 1676 "atlas.tab.c"
     break;
 
   case 53: /* @6: %empty  */
-#line 382 "atlas.y"
+#line 377 "atlas.y"
     {
         generer("affect");
         (yyval.ival) = (yyvsp[-3].ival); // $7: loop var address
     }
-#line 1690 "atlas.tab.c"
+#line 1685 "atlas.tab.c"
     break;
 
   case 54: /* @7: %empty  */
-#line 387 "atlas.y"
+#line 382 "atlas.y"
     {
         int slot = adresse_var++;
         if (adresse_var > max_adresse_var) max_adresse_var = adresse_var;
@@ -1699,28 +1694,28 @@ yyreduce:
         generer(buf);
         (yyval.ival) = slot;
     }
-#line 1703 "atlas.tab.c"
+#line 1698 "atlas.tab.c"
     break;
 
   case 55: /* @8: %empty  */
-#line 396 "atlas.y"
+#line 391 "atlas.y"
     {
         generer("affect");
         (yyval.ival) = (yyvsp[-1].ival); // $11: limit slot address
     }
-#line 1712 "atlas.tab.c"
+#line 1707 "atlas.tab.c"
     break;
 
   case 56: /* @9: %empty  */
-#line 401 "atlas.y"
+#line 396 "atlas.y"
     {
         (yyval.ival) = code_idx; // $13: START OF LOOP LABEL
     }
-#line 1720 "atlas.tab.c"
+#line 1715 "atlas.tab.c"
     break;
 
   case 57: /* @10: %empty  */
-#line 404 "atlas.y"
+#line 399 "atlas.y"
     {
         char buf[256];
         sprintf(buf, "empiler-adr %d", (yyvsp[-10].ival)); 
@@ -1734,11 +1729,11 @@ yyreduce:
         (yyval.ival) = code_idx; // $14: BSF index
         generer("bsf 0");
     }
-#line 1738 "atlas.tab.c"
+#line 1733 "atlas.tab.c"
     break;
 
   case 58: /* instr_pour: TOK_POUR TOK_IDENTIFIANT @4 TOK_DEPUIS $@5 expr @6 TOK_JUSQUA @7 expr @8 pour_opt_step @9 @10 TOK_FAIRE instructions TOK_FPOUR  */
-#line 418 "atlas.y"
+#line 413 "atlas.y"
     {
         char buf[256];
         // Increment: var = var + step
@@ -1763,11 +1758,11 @@ yyreduce:
         // Patch exit
         patcher((yyvsp[-3].ival), code_idx);
     }
-#line 1767 "atlas.tab.c"
+#line 1762 "atlas.tab.c"
     break;
 
   case 59: /* pour_opt_step: %empty  */
-#line 446 "atlas.y"
+#line 441 "atlas.y"
     {
         int slot = adresse_var++;
         if (adresse_var > max_adresse_var) max_adresse_var = adresse_var;
@@ -1778,11 +1773,11 @@ yyreduce:
         generer("affect");
         (yyval.ival) = slot;
     }
-#line 1782 "atlas.tab.c"
+#line 1777 "atlas.tab.c"
     break;
 
   case 60: /* @11: %empty  */
-#line 457 "atlas.y"
+#line 452 "atlas.y"
     {
         int slot = adresse_var++;
         if (adresse_var > max_adresse_var) max_adresse_var = adresse_var;
@@ -1791,39 +1786,39 @@ yyreduce:
         generer(buf);
         (yyval.ival) = slot;
     }
-#line 1795 "atlas.tab.c"
+#line 1790 "atlas.tab.c"
     break;
 
   case 61: /* pour_opt_step: TOK_PARPAS @11 expr  */
-#line 466 "atlas.y"
+#line 461 "atlas.y"
     {
         generer("affect");
         (yyval.ival) = (yyvsp[-1].ival);
     }
-#line 1804 "atlas.tab.c"
+#line 1799 "atlas.tab.c"
     break;
 
   case 62: /* instr_tantque: loop_start cond_tantque instructions TOK_FTQ  */
-#line 476 "atlas.y"
+#line 471 "atlas.y"
      {
          char buf[256];
          sprintf(buf, "bra %d", (yyvsp[-3].ival));
          generer(buf);
          patcher((yyvsp[-2].ival), code_idx);
      }
-#line 1815 "atlas.tab.c"
+#line 1810 "atlas.tab.c"
     break;
 
   case 63: /* loop_start: TOK_TANTQUE  */
-#line 486 "atlas.y"
+#line 481 "atlas.y"
      {
          (yyval.ival) = code_idx;
      }
-#line 1823 "atlas.tab.c"
+#line 1818 "atlas.tab.c"
     break;
 
   case 64: /* cond_tantque: TOK_PAREN_OUV expr TOK_PAREN_FERM TOK_FAIRE  */
-#line 493 "atlas.y"
+#line 488 "atlas.y"
      {
          if ((yyvsp[-2].ival) != 2) {
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: la condition du 'tantque' doit etre un booleen\n", yylineno);
@@ -1832,11 +1827,11 @@ yyreduce:
          (yyval.ival) = code_idx;
          generer("bsf 0");
      }
-#line 1836 "atlas.tab.c"
+#line 1831 "atlas.tab.c"
     break;
 
   case 65: /* cond_tantque: expr TOK_FAIRE  */
-#line 502 "atlas.y"
+#line 497 "atlas.y"
      {
          if ((yyvsp[-1].ival) != 2) {
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: la condition du 'tantque' doit etre un booleen\n", yylineno);
@@ -1845,41 +1840,41 @@ yyreduce:
          (yyval.ival) = code_idx;
          generer("bsf 0");
      }
-#line 1849 "atlas.tab.c"
+#line 1844 "atlas.tab.c"
     break;
 
   case 66: /* instr_passer: TOK_PASSER  */
-#line 514 "atlas.y"
+#line 509 "atlas.y"
      {
          generer("passer");
      }
-#line 1857 "atlas.tab.c"
+#line 1852 "atlas.tab.c"
     break;
 
   case 67: /* expr: TOK_ENTIER  */
-#line 521 "atlas.y"
+#line 516 "atlas.y"
      {
          char buf[256];
          sprintf(buf, "empiler-val %d", (yyvsp[0].ival));
          generer(buf);
          (yyval.ival) = 1;
      }
-#line 1868 "atlas.tab.c"
+#line 1863 "atlas.tab.c"
     break;
 
   case 68: /* expr: TOK_BOOLEEN  */
-#line 528 "atlas.y"
+#line 523 "atlas.y"
      {
          char buf[256];
          sprintf(buf, "empiler-val %d", (yyvsp[0].ival));
          generer(buf);
          (yyval.ival) = 2;
      }
-#line 1879 "atlas.tab.c"
+#line 1874 "atlas.tab.c"
     break;
 
   case 69: /* expr: TOK_IDENTIFIANT  */
-#line 535 "atlas.y"
+#line 530 "atlas.y"
      {
          int idx = -1;
          for (int i = 0; i < nb_vars; i++) {
@@ -1904,11 +1899,11 @@ yyreduce:
              (yyval.ival) = variables[idx].data_type;
          }
      }
-#line 1908 "atlas.tab.c"
+#line 1903 "atlas.tab.c"
     break;
 
   case 70: /* expr: expr TOK_PLUS expr  */
-#line 560 "atlas.y"
+#line 555 "atlas.y"
      {
         if ((yyvsp[-2].ival) != 1 || (yyvsp[0].ival) != 1) {
             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur '+' requiert des entiers\n", yylineno);
@@ -1917,11 +1912,11 @@ yyreduce:
         generer("plus");
         (yyval.ival) = 1;  // result is entier
      }
-#line 1921 "atlas.tab.c"
+#line 1916 "atlas.tab.c"
     break;
 
   case 71: /* expr: expr TOK_MOINS expr  */
-#line 569 "atlas.y"
+#line 564 "atlas.y"
      {
          if ((yyvsp[-2].ival) != 1 || (yyvsp[0].ival) != 1) {
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur '-' requiert des entiers\n", yylineno);
@@ -1930,11 +1925,11 @@ yyreduce:
          generer("moins");
          (yyval.ival) = 1;
      }
-#line 1934 "atlas.tab.c"
+#line 1929 "atlas.tab.c"
     break;
 
   case 72: /* expr: expr TOK_MULT expr  */
-#line 578 "atlas.y"
+#line 573 "atlas.y"
      {
          if ((yyvsp[-2].ival) != 1 || (yyvsp[0].ival) != 1) {
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur '*' requiert des entiers\n", yylineno);
@@ -1943,11 +1938,11 @@ yyreduce:
          generer("mult");
          (yyval.ival) = 1;
      }
-#line 1947 "atlas.tab.c"
+#line 1942 "atlas.tab.c"
     break;
 
   case 73: /* expr: expr TOK_DIV expr  */
-#line 587 "atlas.y"
+#line 582 "atlas.y"
      {
          if ((yyvsp[-2].ival) != 1 || (yyvsp[0].ival) != 1) {
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur '/' requiert des entiers\n", yylineno);
@@ -1956,11 +1951,11 @@ yyreduce:
          generer("div");
          (yyval.ival) = 1;
      }
-#line 1960 "atlas.tab.c"
+#line 1955 "atlas.tab.c"
     break;
 
   case 74: /* expr: expr TOK_MOD expr  */
-#line 596 "atlas.y"
+#line 591 "atlas.y"
      {
          if ((yyvsp[-2].ival) != 1 || (yyvsp[0].ival) != 1) {
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur '%%' requiert des entiers\n", yylineno);
@@ -1969,11 +1964,11 @@ yyreduce:
          generer("mod");
          (yyval.ival) = 1;
      }
-#line 1973 "atlas.tab.c"
+#line 1968 "atlas.tab.c"
     break;
 
   case 75: /* expr: expr TOK_PUISS expr  */
-#line 605 "atlas.y"
+#line 600 "atlas.y"
      {
          if ((yyvsp[-2].ival) != 1 || (yyvsp[0].ival) != 1) {
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur 'puiss' requiert des entiers\n", yylineno);
@@ -1982,11 +1977,11 @@ yyreduce:
          generer("puiss");
          (yyval.ival) = 1;
      }
-#line 1986 "atlas.tab.c"
+#line 1981 "atlas.tab.c"
     break;
 
   case 76: /* expr: TOK_VALABS TOK_PAREN_OUV expr TOK_PAREN_FERM  */
-#line 614 "atlas.y"
+#line 609 "atlas.y"
      {
          if ((yyvsp[-1].ival) != 1) {
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur 'valabs' requiert des entiers\n", yylineno);
@@ -1995,11 +1990,11 @@ yyreduce:
          generer("valabs");
          (yyval.ival) = 1;
      }
-#line 1999 "atlas.tab.c"
+#line 1994 "atlas.tab.c"
     break;
 
   case 77: /* expr: TOK_MOINS expr  */
-#line 623 "atlas.y"
+#line 618 "atlas.y"
      {
          if ((yyvsp[0].ival) != 1) {
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur '-' requiert des entiers\n", yylineno);
@@ -2008,65 +2003,65 @@ yyreduce:
          generer("neg");
          (yyval.ival) = 1;
      }
-#line 2012 "atlas.tab.c"
+#line 2007 "atlas.tab.c"
     break;
 
   case 78: /* expr: expr TOK_EGAL expr  */
-#line 632 "atlas.y"
+#line 627 "atlas.y"
      {
          generer("egal");
          (yyval.ival) = 2;
      }
-#line 2021 "atlas.tab.c"
+#line 2016 "atlas.tab.c"
     break;
 
   case 79: /* expr: expr TOK_DIFF expr  */
-#line 637 "atlas.y"
+#line 632 "atlas.y"
      {
          generer("dif");
          (yyval.ival) = 2;
      }
-#line 2030 "atlas.tab.c"
+#line 2025 "atlas.tab.c"
     break;
 
   case 80: /* expr: expr TOK_INF expr  */
-#line 642 "atlas.y"
+#line 637 "atlas.y"
      {
          generer("pps");
          (yyval.ival) = 2;
      }
-#line 2039 "atlas.tab.c"
+#line 2034 "atlas.tab.c"
     break;
 
   case 81: /* expr: expr TOK_SUP expr  */
-#line 647 "atlas.y"
+#line 642 "atlas.y"
      {
          generer("pgs");
          (yyval.ival) = 2;
      }
-#line 2048 "atlas.tab.c"
+#line 2043 "atlas.tab.c"
     break;
 
   case 82: /* expr: expr TOK_INF_EG expr  */
-#line 652 "atlas.y"
+#line 647 "atlas.y"
      {
          generer("pp-egal");
          (yyval.ival) = 2;
      }
-#line 2057 "atlas.tab.c"
+#line 2052 "atlas.tab.c"
     break;
 
   case 83: /* expr: expr TOK_SUP_EG expr  */
-#line 657 "atlas.y"
+#line 652 "atlas.y"
      {
          generer("pg-egal");
          (yyval.ival) = 2;
      }
-#line 2066 "atlas.tab.c"
+#line 2061 "atlas.tab.c"
     break;
 
   case 84: /* expr: expr TOK_ET expr  */
-#line 662 "atlas.y"
+#line 657 "atlas.y"
      {
          if ((yyvsp[-2].ival) != 2 || (yyvsp[0].ival) != 2) {
             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur 'et' requiert des booleens\n", yylineno);
@@ -2075,11 +2070,11 @@ yyreduce:
          generer("et");
          (yyval.ival) = 2;
      }
-#line 2079 "atlas.tab.c"
+#line 2074 "atlas.tab.c"
     break;
 
   case 85: /* expr: expr TOK_OU expr  */
-#line 671 "atlas.y"
+#line 666 "atlas.y"
      {
          if ((yyvsp[-2].ival) != 2 || (yyvsp[0].ival) != 2) {
             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur 'ou' requiert des booleens\n", yylineno);
@@ -2088,11 +2083,11 @@ yyreduce:
          generer("ou");
          (yyval.ival) = 2;
      }
-#line 2092 "atlas.tab.c"
+#line 2087 "atlas.tab.c"
     break;
 
   case 86: /* expr: TOK_NON expr  */
-#line 680 "atlas.y"
+#line 675 "atlas.y"
      {
          if ((yyvsp[0].ival) != 2) {
             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur 'non' requiert un booleen\n", yylineno);
@@ -2101,19 +2096,19 @@ yyreduce:
          generer("non");
          (yyval.ival) = 2;
      }
-#line 2105 "atlas.tab.c"
+#line 2100 "atlas.tab.c"
     break;
 
   case 87: /* expr: TOK_PAREN_OUV expr TOK_PAREN_FERM  */
-#line 689 "atlas.y"
+#line 684 "atlas.y"
      {
          (yyval.ival) = (yyvsp[-1].ival);
      }
-#line 2113 "atlas.tab.c"
+#line 2108 "atlas.tab.c"
     break;
 
 
-#line 2117 "atlas.tab.c"
+#line 2112 "atlas.tab.c"
 
       default: break;
     }
@@ -2306,7 +2301,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 693 "atlas.y"
+#line 688 "atlas.y"
 
 
 /*  ═════════════════════════════════════════════════════════
@@ -2359,50 +2354,4 @@ int chercher_var_silence(const char *nom) {
 void yyerror(const char *msg) {
      extern int yylineno;
      fprintf(stderr, "[ERREUR SYNTAXIQUE] ligne %d : %s\n", yylineno, msg);
-}
-
-int main(int argc, char *argv[]) {
-    FILE *f = NULL;
-
-    if (argc >= 2) {
-        f = fopen(argv[1], "r");
-        if (!f) {
-            fprintf(stderr, "Impossible d'ouvrir : %s\n", argv[1]);
-            return 1;
-        }
-        yyin = f;
-    }
-    
-    int result = yyparse();
-
-    if (result == 0) {
-        // Patch reserver-var with max_adresse_var
-        if (code_idx > 1 && strncmp(code[1].instruction, "reserver-var", 12) == 0) {
-            sprintf(code[1].instruction, "reserver-var %d", max_adresse_var);
-        }
-        
-        char map_fileName[256];
-        if (argc >= 2) {
-            strcpy(map_fileName, argv[1]);
-            char *dot = strrchr(map_fileName, '.');
-            if (dot) strcpy(dot, ".map");
-            else strcat(map_fileName, ".map");
-        } else {
-            strcpy(map_fileName, "output.map");
-        }
-        FILE *map_file = fopen(map_fileName, "w");
-        if (!map_file) {
-            fprintf(stderr, "Impossible de creer : %s\n", map_fileName);
-            return 1;
-        }
-        
-        for (int i = 0; i < code_idx; i++) {
-            fprintf(map_file, "%d\t%s\n", i + 1, code[i].instruction);
-        }
-        fclose(map_file);
-        printf("MAP code generated: %s\n", map_fileName);
-    }
-
-    if (f) fclose(f);
-    return result;
 }

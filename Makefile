@@ -6,8 +6,8 @@ YFLAGS = -d
 
 all: atlas map_interpreter
 
-atlas: atlas.tab.c lex.yy.c
-	$(CC) -o atlas atlas.tab.c lex.yy.c $(CFLAGS)
+atlas: atlas.tab.c lex.yy.c main.c
+	$(CC) -o atlas main.c atlas.tab.c lex.yy.c $(CFLAGS)
 
 atlas.tab.c atlas.tab.h: atlas.y
 	$(YACC) $(YFLAGS) atlas.y

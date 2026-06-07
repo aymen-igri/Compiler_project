@@ -3,14 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "atlas.h"
 
-extern FILE *yyin;
 extern int yylineno;
-
-/* Code generation */
-typedef struct {
-    char instruction[256];
-} Instruction;
 
 Instruction code[10000];
 int code_idx = 0;
@@ -742,50 +737,4 @@ int chercher_var_silence(const char *nom) {
 void yyerror(const char *msg) {
      extern int yylineno;
      fprintf(stderr, "[ERREUR SYNTAXIQUE] ligne %d : %s\n", yylineno, msg);
-}
-
-int main(int argc, char *argv[]) {
-    FILE *f = NULL;
-
-    if (argc >= 2) {
-        f = fopen(argv[1], "r");
-        if (!f) {
-            fprintf(stderr, "Impossible d'ouvrir : %s\n", argv[1]);
-            return 1;
-        }
-        yyin = f;
-    }
-    
-    int result = yyparse();
-
-    if (result == 0) {
-        // Patch reserver-var with max_adresse_var
-        if (code_idx > 1 && strncmp(code[1].instruction, "reserver-var", 12) == 0) {
-            sprintf(code[1].instruction, "reserver-var %d", max_adresse_var);
-        }
-        
-        char map_fileName[256];
-        if (argc >= 2) {
-            strcpy(map_fileName, argv[1]);
-            char *dot = strrchr(map_fileName, '.');
-            if (dot) strcpy(dot, ".map");
-            else strcat(map_fileName, ".map");
-        } else {
-            strcpy(map_fileName, "output.map");
-        }
-        FILE *map_file = fopen(map_fileName, "w");
-        if (!map_file) {
-            fprintf(stderr, "Impossible de creer : %s\n", map_fileName);
-            return 1;
-        }
-        
-        for (int i = 0; i < code_idx; i++) {
-            fprintf(map_file, "%d\t%s\n", i + 1, code[i].instruction);
-        }
-        fclose(map_file);
-        printf("MAP code generated: %s\n", map_fileName);
-    }
-
-    if (f) fclose(f);
-    return result;
 }
