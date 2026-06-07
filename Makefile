@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -lm
+CFLAGS = -lm -DAVEC_BISON
 LEX = flex
 YACC = bison
 YFLAGS = -d

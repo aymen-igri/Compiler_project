@@ -1,0 +1,27 @@
+1	ouverture-bloc
+2	reserver-var 3
+3	empiler-adr 0
+4	lire
+5	empiler-adr 1
+6	empiler-adr 0
+7	valeur-pile
+8	empiler-val 2
+9	mult
+10	affect
+11	empiler-adr 1
+12	valeur-pile
+13	empiler-val 100
+14	pg-egal
+15	bsf 19
+16	empiler-adr 2
+17	empiler-val 100
+18	affect
+19	bra 23
+20	empiler-adr 2
+21	empiler-adr 1
+22	valeur-pile
+23	affect
+24	empiler-adr 2
+25	valeur-pile
+26	ecrire
+27	fermeture-bloc

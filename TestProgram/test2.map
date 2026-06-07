@@ -1,0 +1,246 @@
+1	ouverture-bloc
+2	reserver-var 9
+3	empiler-adr 0
+4	lire
+5	empiler-adr 1
+6	lireRC
+7	imprimer valeur de a :
+8	empiler-adr 0
+9	valeur-pile
+10	ecrire
+11	empiler-adr 1
+12	valeur-pile
+13	ecrireRC
+14	imprimerRC fin ligne
+15	empiler-adr 2
+16	empiler-adr 0
+17	valeur-pile
+18	empiler-adr 1
+19	valeur-pile
+20	plus
+21	affect
+22	empiler-adr 2
+23	empiler-adr 0
+24	valeur-pile
+25	empiler-adr 1
+26	valeur-pile
+27	moins
+28	affect
+29	empiler-adr 2
+30	empiler-adr 0
+31	valeur-pile
+32	empiler-adr 1
+33	valeur-pile
+34	mult
+35	affect
+36	empiler-adr 2
+37	empiler-adr 0
+38	valeur-pile
+39	empiler-adr 1
+40	valeur-pile
+41	div
+42	affect
+43	empiler-adr 2
+44	empiler-adr 0
+45	valeur-pile
+46	empiler-adr 1
+47	valeur-pile
+48	mod
+49	affect
+50	empiler-adr 2
+51	empiler-adr 0
+52	valeur-pile
+53	empiler-adr 1
+54	valeur-pile
+55	puiss
+56	affect
+57	empiler-adr 2
+58	empiler-adr 0
+59	valeur-pile
+60	empiler-adr 1
+61	valeur-pile
+62	moins
+63	valabs
+64	affect
+65	empiler-adr 2
+66	empiler-adr 0
+67	valeur-pile
+68	neg
+69	affect
+70	empiler-adr 0
+71	valeur-pile
+72	empiler-adr 1
+73	valeur-pile
+74	egal
+75	bsf 76
+76	imprimer egal
+77	empiler-adr 0
+78	valeur-pile
+79	empiler-adr 1
+80	valeur-pile
+81	dif
+82	bsf 83
+83	imprimer different
+84	empiler-adr 0
+85	valeur-pile
+86	empiler-adr 1
+87	valeur-pile
+88	pps
+89	bsf 90
+90	imprimer inferieur
+91	empiler-adr 0
+92	valeur-pile
+93	empiler-adr 1
+94	valeur-pile
+95	pgs
+96	bsf 97
+97	imprimer superieur
+98	empiler-adr 0
+99	valeur-pile
+100	empiler-adr 1
+101	valeur-pile
+102	pp-egal
+103	bsf 104
+104	imprimer inf ou egal
+105	empiler-adr 0
+106	valeur-pile
+107	empiler-adr 1
+108	valeur-pile
+109	pg-egal
+110	bsf 111
+111	imprimer sup ou egal
+112	empiler-adr 3
+113	valeur-pile
+114	empiler-adr 4
+115	valeur-pile
+116	et
+117	bsf 118
+118	imprimer et logique
+119	empiler-adr 3
+120	valeur-pile
+121	empiler-adr 4
+122	valeur-pile
+123	ou
+124	bsf 125
+125	imprimer ou logique
+126	empiler-adr 3
+127	valeur-pile
+128	non
+129	bsf 130
+130	imprimer non logique
+131	empiler-adr 0
+132	valeur-pile
+133	empiler-val 100
+134	pps
+135	bsf 140
+136	empiler-adr 2
+137	empiler-adr 0
+138	valeur-pile
+139	affect
+140	bra 143
+141	empiler-adr 2
+142	empiler-val 100
+143	affect
+144	empiler-adr 0
+145	empiler-val 1
+146	affect
+147	empiler-adr 5
+148	empiler-val 10
+149	affect
+150	empiler-adr 6
+151	empiler-val 1
+152	affect
+153	empiler-adr 0
+154	valeur-pile
+155	empiler-adr 5
+156	valeur-pile
+157	pp-egal
+158	bsf 173
+159	empiler-adr 2
+160	empiler-adr 2
+161	valeur-pile
+162	empiler-adr 0
+163	valeur-pile
+164	plus
+165	affect
+166	empiler-adr 0
+167	empiler-adr 0
+168	valeur-pile
+169	empiler-adr 6
+170	valeur-pile
+171	plus
+172	affect
+173	bra 152
+174	empiler-adr 0
+175	empiler-val 0
+176	affect
+177	empiler-adr 7
+178	empiler-val 100
+179	affect
+180	empiler-adr 8
+181	empiler-val 2
+182	affect
+183	empiler-adr 0
+184	valeur-pile
+185	empiler-adr 7
+186	valeur-pile
+187	pp-egal
+188	bsf 197
+189	imprimer pair
+190	empiler-adr 0
+191	empiler-adr 0
+192	valeur-pile
+193	empiler-adr 8
+194	valeur-pile
+195	plus
+196	affect
+197	bra 182
+198	empiler-adr 0
+199	valeur-pile
+200	empiler-val 0
+201	dif
+202	bsf 209
+203	empiler-adr 0
+204	empiler-adr 0
+205	valeur-pile
+206	empiler-val 1
+207	moins
+208	affect
+209	bra 197
+210	passer
+211	empiler-adr 2
+212	empiler-adr 0
+213	valeur-pile
+214	empiler-adr 1
+215	valeur-pile
+216	plus
+217	empiler-adr 0
+218	valeur-pile
+219	empiler-adr 1
+220	valeur-pile
+221	moins
+222	mult
+223	affect
+224	empiler-adr 2
+225	empiler-adr 0
+226	valeur-pile
+227	empiler-adr 1
+228	valeur-pile
+229	mult
+230	empiler-adr 2
+231	valeur-pile
+232	empiler-val 2
+233	div
+234	plus
+235	affect
+236	empiler-adr 3
+237	empiler-val 1
+238	affect
+239	empiler-adr 4
+240	empiler-val 0
+241	affect
+242	imprimer resultat final :
+243	empiler-adr 2
+244	valeur-pile
+245	ecrireRC
+246	fermeture-bloc

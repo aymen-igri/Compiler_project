@@ -1,0 +1,49 @@
+1	ouverture-bloc
+2	reserver-var 5
+3	empiler-adr 0
+4	lire
+5	empiler-adr 0
+6	valeur-pile
+7	empiler-val 0
+8	pps
+9	bsf 11
+10	imprimer impossible
+11	bra 48
+12	empiler-adr 1
+13	empiler-val 1
+14	affect
+15	empiler-adr 2
+16	empiler-val 2
+17	affect
+18	empiler-adr 3
+19	empiler-adr 0
+20	valeur-pile
+21	affect
+22	empiler-adr 4
+23	empiler-val 1
+24	affect
+25	empiler-adr 2
+26	valeur-pile
+27	empiler-adr 3
+28	valeur-pile
+29	pp-egal
+30	bsf 45
+31	empiler-adr 1
+32	empiler-adr 1
+33	valeur-pile
+34	empiler-adr 2
+35	valeur-pile
+36	mult
+37	affect
+38	empiler-adr 2
+39	empiler-adr 2
+40	valeur-pile
+41	empiler-adr 4
+42	valeur-pile
+43	plus
+44	affect
+45	bra 24
+46	empiler-adr 1
+47	valeur-pile
+48	ecrire
+49	fermeture-bloc

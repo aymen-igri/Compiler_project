@@ -47,6 +47,7 @@ typedef struct {
 Variable variables[100];
 int nb_vars = 0;
 int adresse_var = 0;
+int max_adresse_var = 0;
 int current_dec_type = 0;
 int current_bsf_index = 0;
 
@@ -75,8 +76,9 @@ int etiq = 0;
 void yyerror(const char *msg);
 int yylex();
 
-int ajouter_var(const char *nom, int type, int data_type, int valeur);
+int ajouter_var(const char *nom, int is_const, int valeur, int data_type);
 int chercher_var(const char *nom);
+int chercher_var_silence(const char *nom);
 
 %}
 
@@ -139,7 +141,6 @@ int chercher_var(const char *nom);
 %type <ival> cond_si
 %type <ival> loop_start
 %type <ival> cond_tantque
-%type <ival> else_marker
 %type <ival> pour_opt_step
 
 %%
@@ -152,9 +153,16 @@ programme:
     TOK_PROGRAMME TOK_IDENTIFIANT TOK_POINT_VIRGULE
     declarations
     TOK_DEBUT
+    {
+        generer("ouverture-bloc");
+        char buf[256];
+        sprintf(buf, "reserver-var %d", adresse_var);
+        generer(buf);
+    }
     instructions
     TOK_FIN optional_point
     {
+        generer("fermeture-bloc");
     }
     ;
 
@@ -311,8 +319,8 @@ instr_affectation:
      }
      expr
      {
-         int expected_type = $<ival>$;
-         if ($4 != expected_type && expected_type != -1) {
+         int expected_type = $<ival>3;
+         if ($<ival>4 != expected_type && expected_type != -1) {
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: type incompatible dans l'affectation (attendu: %s, trouve: %s)\n",
                                  yylineno, type_name(expected_type), type_name($4));
             exit(1);
@@ -326,9 +334,15 @@ instr_si:
      {
          patcher($1, code_idx);
      }
-     | cond_si instructions else_marker instructions TOK_FSI
+     | cond_si instructions TOK_SINON 
+       {
+           $<ival>$ = code_idx;
+           generer("bra 0");
+           patcher($1, code_idx);
+       }
+       instructions TOK_FSI
      {
-         patcher($3, code_idx);
+         patcher($<ival>4, code_idx);
      }
      ;
 
@@ -339,9 +353,8 @@ cond_si:
             fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: la condition du 'si' doit etre un booleen\n", yylineno);
             exit(1);
          }
-         $$ = code_idx;
          generer("bsf 0");
-         current_bsf_index = $$;
+         $$ = code_idx -1;
      }
      | TOK_SI expr TOK_ALORS
      {
@@ -351,16 +364,6 @@ cond_si:
          }
          $$ = code_idx;
          generer("bsf 0");
-         current_bsf_index = $$;
-     }
-     ;
-
-else_marker:
-     TOK_SINON
-     {
-         $$ = code_idx;
-         generer("bra 0");
-         patcher(current_bsf_index, code_idx); // patch the bsf from cond_si
      }
      ;
 
@@ -374,16 +377,16 @@ instr_pour:
         char buf[256];
         sprintf(buf, "empiler-adr %d", $<ival>3); 
         generer(buf);
-        
     }
     expr
     {
         generer("affect");
-        $<ival>$ = $<ival>3; // $5: loop var address
+        $<ival>$ = $<ival>3; // $7: loop var address
     }
     TOK_JUSQUA 
     {
         int slot = adresse_var++;
+        if (adresse_var > max_adresse_var) max_adresse_var = adresse_var;
         char buf[256];
         sprintf(buf, "empiler-adr %d", slot); 
         generer(buf);
@@ -392,11 +395,11 @@ instr_pour:
     expr
     {
         generer("affect");
-        $<ival>$ = $<ival>2; // $7: limit slot
+        $<ival>$ = $<ival>9; // $11: limit slot address
     }
     pour_opt_step
     {
-        $<ival>$ = code_idx; // $9: START OF LOOP LABEL
+        $<ival>$ = code_idx; // $13: START OF LOOP LABEL
     }
     {
         char buf[256];
@@ -404,11 +407,11 @@ instr_pour:
         generer(buf);
         generer("valeur-pile");
         
-        sprintf(buf, "empiler-adr %d", $<ival>9); 
+        sprintf(buf, "empiler-adr %d", $<ival>11); 
         generer(buf);
         generer("valeur-pile");
         generer("pp-egal");
-        $<ival>$ = code_idx; // $10: BSF index
+        $<ival>$ = code_idx; // $14: BSF index
         generer("bsf 0");
     }
     TOK_FAIRE instructions TOK_FPOUR
@@ -416,10 +419,16 @@ instr_pour:
         char buf[256];
         // Increment: var = var + step
         sprintf(buf, "empiler-adr %d", $<ival>3); 
-        generer(buf);
-        sprintf(buf, "empiler-adr %d", $<ival>7); 
+        generer(buf); // Address for assignment
+        
+        sprintf(buf, "empiler-adr %d", $<ival>3); 
         generer(buf);
         generer("valeur-pile");
+        
+        sprintf(buf, "empiler-adr %d", $<ival>12); 
+        generer(buf);
+        generer("valeur-pile");
+        
         generer("plus");
         generer("affect");
         
@@ -436,6 +445,7 @@ pour_opt_step:
     /* vide */
     {
         int slot = adresse_var++;
+        if (adresse_var > max_adresse_var) max_adresse_var = adresse_var;
         char buf[256];
         sprintf(buf, "empiler-adr %d", slot);
         generer(buf);
@@ -446,6 +456,7 @@ pour_opt_step:
     | TOK_PARPAS 
     {
         int slot = adresse_var++;
+        if (adresse_var > max_adresse_var) max_adresse_var = adresse_var;
         char buf[256];
         sprintf(buf, "empiler-adr %d", slot);
         generer(buf);
@@ -501,7 +512,7 @@ cond_tantque:
 instr_passer:
      TOK_PASSER
      {
-         generer("/* passer */");
+         generer("passer");
      }
      ;
 
@@ -578,7 +589,7 @@ expr:
              fprintf(stderr, "[ERREUR SEMANTIQUE] ligne %d: operateur '/' requiert des entiers\n", yylineno);
              exit(1);
          }
-         generer("division");
+         generer("div");
          $$ = 1;
      }
      | expr TOK_MOD expr
@@ -691,7 +702,7 @@ int ajouter_var(const char *nom, int is_const, int valeur, int data_type) {
          return -1;
      }
 
-     if (chercher_var(nom) != -1) {
+     if (chercher_var_silence(nom) != -1) {
          fprintf(stderr, "Erreur : variable '%s' deja declaree\n", nom);
          return -1;
      }
@@ -703,12 +714,13 @@ int ajouter_var(const char *nom, int is_const, int valeur, int data_type) {
      variables[nb_vars].valeur = valeur;
 
      if (!is_const) {
-         adresse_var++;
+          adresse_var++;
+          if (adresse_var > max_adresse_var) max_adresse_var = adresse_var;
      }
 
      nb_vars++;
      return variables[nb_vars - 1].adresse;
-}
+ }
 
 int chercher_var(const char *nom) {
     for (int i = 0; i < nb_vars; i++) {
@@ -716,6 +728,14 @@ int chercher_var(const char *nom) {
             return variables[i].adresse;
     }
     fprintf(stderr, "Erreur : variable '%s' non declaree\n", nom);
+    return -1;
+}
+
+int chercher_var_silence(const char *nom) {
+    for (int i = 0; i < nb_vars; i++) {
+        if (strcmp(variables[i].nom, nom) == 0)
+            return variables[i].adresse;
+    }
     return -1;
 }
 
@@ -739,6 +759,11 @@ int main(int argc, char *argv[]) {
     int result = yyparse();
 
     if (result == 0) {
+        // Patch reserver-var with max_adresse_var
+        if (code_idx > 1 && strncmp(code[1].instruction, "reserver-var", 12) == 0) {
+            sprintf(code[1].instruction, "reserver-var %d", max_adresse_var);
+        }
+        
         char map_fileName[256];
         if (argc >= 2) {
             strcpy(map_fileName, argv[1]);
